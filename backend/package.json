@@ -1,0 +1,22 @@
+{
+  "name": "credentials-provider",
+  "version": "1.0.0",
+  "description": "Node.js based credentials-provider",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/K-Link-Tech/credentials-provider.git/backend"
+  },
+  "keywords": [
+    "CR-B"
+  ],
+  "author": "Aung Tay Zar Maung",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.1.3"
+  }
+}
