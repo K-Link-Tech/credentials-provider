@@ -1,9 +1,14 @@
 import { drizzle } from "drizzle-orm/postgres-js";
+import { sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
+import { user } from "./schema/user.schema";
 import postgres from "postgres";
  
 const connectionString = "postgres://postgres:Micahsim00@localhost3000/credential_provider"
-const sql = postgres(connectionString, { max: 1 })
-const db = drizzle(sql);
+const credentialProviderPG = postgres(connectionString, { max: 1 })
+const db = drizzle(credentialProviderPG);
  
-await migrate(db, { migrationsFolder: "drizzle" });
+migrate(db, { migrationsFolder: "drizzle" });
+
+console.log(db.select().from(user));
+
