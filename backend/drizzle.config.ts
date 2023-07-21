@@ -1,6 +1,6 @@
 import type { Config } from "drizzle-kit";
  
-const connectionSecureString = "postgres://postgres:Micahsim00@localhost3000/credential_provider";
+const connectionSecureString = "postgres://postgres:Micahsim00**@localhost:5432/credential_provider";
 
 export default {
   schema: "./src/modules/authentication/schema",
