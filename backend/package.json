@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Node.js based credentials-provider",
   "main": "index.ts",
-  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "db:generate": "drizzle-kit generate:pg --config=./drizzle.config.ts",
-    "db:push": "drizzle-kit push:pg --config=./drizzle.config.ts"
+    "db:delete": "drizzle-kit drop --config=./drizzle.config.ts",
+    "db:push": "drizzle-kit push:pg --config=./drizzle.config.ts",
+    "db:deploy": "ts-node ./drizzle/migrations/migrate.ts"
   },
   "repository": {
     "type": "git",

@@ -8,5 +8,6 @@ export default {
   driver: "pg",
   dbCredentials: {
     connectionString: connectionSecureString,
-  }
+  },
+  strict: true
 } satisfies Config;
