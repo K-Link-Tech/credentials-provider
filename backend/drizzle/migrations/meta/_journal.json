@@ -8,6 +8,13 @@
       "when": 1689935015795,
       "tag": "0000_wooden_shiva",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1690171164998,
+      "tag": "0001_woozy_hercules",
+      "breakpoints": true
     }
   ]
 }
