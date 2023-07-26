@@ -4,6 +4,7 @@
   "description": "Node.js based credentials-provider",
   "main": "index.ts",
   "scripts": {
+    "start" : "nodemon index.js",
     "db:generate": "drizzle-kit generate:pg --config=./drizzle.config.ts",
     "db:delete": "drizzle-kit drop --config=./drizzle.config.ts",
     "db:push": "drizzle-kit push:pg --config=./drizzle.config.ts",
