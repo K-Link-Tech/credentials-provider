@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "Node.js based credentials-provider",
   "main": "index.ts",
+  "type": "module", 
   "scripts": {
-    "start": "nodemon index.js",
+    "dev": "nodemon .",
+    "start": "node .",
     "db:generate": "drizzle-kit generate:pg --config=./drizzle.config.ts",
     "db:delete": "drizzle-kit drop --config=./drizzle.config.ts",
     "db:push": "drizzle-kit push:pg --config=./drizzle.config.ts",
