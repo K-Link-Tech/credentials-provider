@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Node.js based credentials-provider",
   "main": "index.ts",
-  "type": "module", 
+  "type": "module",
   "scripts": {
     "dev": "nodemon .",
     "start": "node .",
@@ -25,6 +25,7 @@
     "commitizen": "^4.3.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
     "drizzle-orm": "^0.27.2",
     "express": "^4.18.2",
     "postgres": "^3.3.5",
