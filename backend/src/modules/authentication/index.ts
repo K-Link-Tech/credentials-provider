@@ -1,16 +1,30 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import { sql } from "drizzle-orm";
-import { users } from "./schema/users.schema";
-import express, { json } from "express";
+import express, { Express, Request, Response ,json } from 'express';
 import cors from "cors";
-import cookieParser from "cookie-parser";
-import postgres from "postgres";
- 
-const connectionString = "postgres://postgres:Micahsim00**@localhost:5432/credential_provider"
-const credentialProviderPG = postgres(connectionString, { max: 1 })
-const db = drizzle(credentialProviderPG);
+import dotenv from "dotenv";
+import cookieParser from 'cookie-parser';
+import userRouter from "./routes/users-routes";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
-const app = express();
+dotenv.config();
 
-app.listen()
+//const __dirname = dirname(fileURLToPath('backend\src\modules\authentication\public'));
+
+const app: Express = express();
+const PORT = 3000;
+const corsOption = { credentials: true, origin: "http://localhost:3000" };
+
+app.use(cors(corsOption));
+app.use(json());
+app.use(cookieParser());
+
+//app.use('/', express.static(join(__dirname, 'public')));
+
+app.use('/api/users', userRouter);
+
+app.get('/', (req: Request, res: Response) => {
+    res.send("Credential Provider Landing Page");
+});
+
+app.listen(PORT, () => console.log(`Server is listening on ${PORT}`));
 
