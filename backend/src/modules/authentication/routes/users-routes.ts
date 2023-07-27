@@ -1,27 +1,10 @@
-import express, { Express, Request, Response, Router } from 'express';
-import db from '../db';
-import bcrypt from "bcrypt";
-import errorMessage from "../../../../errorHandler";
-import { users } from '../schema/users.schema';
+import { Router } from 'express';
+import controller from '../controller';
 
 const router = Router();
 
-router.get('/', async (req: Request, res: Response) => {
-    try {
-        const usersRequested = await db.select().from(users);
-        res.json({users : usersRequested.forEach});
-    } catch (error) {
-        res.status(500).get(errorMessage(error));
-    }
-});
+router.get('/', controller.getAllUsers);
 
-router.post('/', async (req: Request, res: Response) => {
-    try {
-        const hashedPassword = await bcrypt.hash(req.body.password);         
-    } catch (error) {
-        
-    }
-});
-
+router.post('/', controller.addNewUser);
 
 export default router;

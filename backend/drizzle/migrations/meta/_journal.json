@@ -15,6 +15,13 @@
       "when": 1690171164998,
       "tag": "0001_woozy_hercules",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1690454873512,
+      "tag": "0002_pink_smiling_tiger",
+      "breakpoints": true
     }
   ]
 }

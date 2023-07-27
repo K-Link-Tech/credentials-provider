@@ -1,14 +1,12 @@
 import express, { Express, Request, Response ,json } from 'express';
+import { resolve } from 'path';
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from 'cookie-parser';
 import userRouter from "./routes/users-routes";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import authRouter from "./routes/auth-routes";
 
-dotenv.config();
-
-//const __dirname = dirname(fileURLToPath('backend\src\modules\authentication\public'));
+dotenv.config({path: resolve(__dirname, "../../../../.env")});
 
 const app: Express = express();
 const PORT = 3000;
@@ -18,9 +16,9 @@ app.use(cors(corsOption));
 app.use(json());
 app.use(cookieParser());
 
-//app.use('/', express.static(join(__dirname, 'public')));
 
 app.use('/api/users', userRouter);
+app.use('/api/auth', authRouter);
 
 app.get('/', (req: Request, res: Response) => {
     res.send("Credential Provider Landing Page");
