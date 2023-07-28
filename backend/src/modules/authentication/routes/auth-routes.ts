@@ -4,7 +4,6 @@ import controller from '../controllers/user';
 const router = Router();
 
 // handle login
-router.post('/login', controller.loginUser);
 
 router.get('/validate', controller.validateToken);
 
