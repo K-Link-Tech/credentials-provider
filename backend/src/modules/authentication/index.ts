@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 import userRouter from "./routes/users-routes";
 import authRouter from "./routes/auth-routes";
 
-dotenv.config({path: resolve(__dirname, "../../../../.env")});
+dotenv.config({path: resolve(__dirname, "../../../.env")});
 
 const app: Express = express();
 const PORT = 3000;
