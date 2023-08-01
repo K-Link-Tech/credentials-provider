@@ -35,7 +35,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
         logging.info(NAMESPACE, "Data displayed.");        
         return res.status(201).json({users: req.body});
     } catch (error) {
-        res.status(500).get(errorMessage(error));
+        return res.status(500).get(errorMessage(error));
     }
 };
 
@@ -69,7 +69,7 @@ const loginUserNew = async (req: Request, res: Response, next: NextFunction) => 
             }
         });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             message: errorMessage(error),
             error
         })
@@ -88,7 +88,7 @@ const getAllUsers =  async (req: Request, res: Response) => {
         logging.info(NAMESPACE, "Data has been fetched... \nDisplaying now: \n");
         res.json({users : usersRequested});
     } catch (error) {
-        res.status(500).get(errorMessage(error));
+        return res.status(500).get(errorMessage(error));
     }
 };
 

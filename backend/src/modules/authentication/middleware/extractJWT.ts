@@ -13,6 +13,7 @@ const extractJWT = (req: Request, res: Response, next: NextFunction) => {
     if (token) {
         jwt.verify(token, config.server.token.secret, (error, decoded) => {
             if (error) {
+                logging.error(NAMESPACE, "Token given is invalid!")
                 return res.status(404).json({
                     message: error.message,
                     error
@@ -23,6 +24,7 @@ const extractJWT = (req: Request, res: Response, next: NextFunction) => {
             }
         });
     } else {
+        logging.error(NAMESPACE, "User is unauthorized!")
         return res.status(401).json({
             message: "Unauthorized!"
         });
