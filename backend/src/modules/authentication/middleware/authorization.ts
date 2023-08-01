@@ -8,7 +8,7 @@ import { Request, Response, NextFunction } from "express";
 
 dotenv.config({path: resolve(__dirname, "../../../../.env")});
 
-function authenticateToken( req: RequestWithUser , res: Response, next : NextFunction ){
+function authenticateToken( req: Request , res: Response, next : NextFunction ){
     const authHeader = req.headers['authorization']; // contains "Bearer TOKEN"
     if (authHeader == null) {
         return res.status(401).json({error: "Null token received."});
@@ -19,8 +19,9 @@ function authenticateToken( req: RequestWithUser , res: Response, next : NextFun
         if (error) {
             return res.status(403).json({error: getErrorMessage(error)});
         }
+        res.locals.jwt = payload;
         return next(); 
     });
 };
 
-export {authenticateToken};
+export default authenticateToken;

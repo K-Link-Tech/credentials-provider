@@ -76,24 +76,24 @@ const loginUserNew = async (req: Request, res: Response, next: NextFunction) => 
     }
 };
 
-const getAllUsersNew = (req: Request, res: Response, next: NextFunction) => {
-    // TODO: Fill up later 
-};
-
 // module to fetch all users in db
-const getAllUsers =  async (req: Request, res: Response) => {
+const getAllUsersNew = async (req: Request, res: Response, next: NextFunction) => {
     try {
         logging.info(NAMESPACE, "Fetching data from database.");
         const usersRequested = await db.select().from(users);
         logging.info(NAMESPACE, "Data has been fetched... \nDisplaying now: \n");
-        res.json({users : usersRequested});
+        return res.status(200).json({
+            users : usersRequested,
+            data : res.locals.jwt
+        });
     } catch (error) {
+        logging.error(NAMESPACE, "Get request failed!");
         return res.status(500).get(errorMessage(error));
     }
 };
 
+
 export default {
-    getAllUsers,
     validateToken,
     register,
     loginUserNew,
