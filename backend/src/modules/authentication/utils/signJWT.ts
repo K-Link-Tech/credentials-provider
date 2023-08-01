@@ -42,7 +42,7 @@ const signJWT = (user: User, callback: (error: Error | null, token: string | nul
         );
     } catch (error) {
         logging.error(NAMESPACE, errorMessage(error), error);
-        callback(new Error("error while signing jwt"), null); // what is this for?
+        callback(new Error("Error while signing jwt."), null);
     }
 };
 

@@ -22,17 +22,17 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     let { name, email, password } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        console.log("Password hashed!")
+        logging.info(NAMESPACE,"Password hashed!");
         await db.insert(users).values({ 
             name: name,
             email: email,
             password: hashedPassword
         }).catch( (error) => {
-            console.log(error);
+            logging.error(NAMESPACE,error.message, error);
             return res.status(403).json({ message: "User already exist." })
         }); // Return 403 error if exist record, else carry on.
-        console.log("Data has been sent to database");
-        console.log("Data displayed.");        
+        logging.info(NAMESPACE, "Data has been sent to database.");
+        logging.info(NAMESPACE, "Data displayed.");        
         return res.status(201).json({users: req.body});
     } catch (error) {
         res.status(500).get(errorMessage(error));
@@ -83,9 +83,9 @@ const getAllUsersNew = (req: Request, res: Response, next: NextFunction) => {
 // module to fetch all users in db
 const getAllUsers =  async (req: Request, res: Response) => {
     try {
-        console.log("Fetching data from database.");
+        logging.info(NAMESPACE, "Fetching data from database.");
         const usersRequested = await db.select().from(users);
-        console.log("Data has been fetched... \nDisplaying now: \n");
+        logging.info(NAMESPACE, "Data has been fetched... \nDisplaying now: \n");
         res.json({users : usersRequested});
     } catch (error) {
         res.status(500).get(errorMessage(error));
