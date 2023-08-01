@@ -27,7 +27,10 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
             name: name,
             email: email,
             password: hashedPassword
-        });
+        }).catch( (error) => {
+            console.log(error);
+            return res.status(403).json({ message: "User already exist." })
+        }); // Return 403 error if exist record, else carry on.
         console.log("Data has been sent to database");
         console.log("Data displayed.");        
         return res.status(201).json({users: req.body});
