@@ -5,9 +5,8 @@ import authenticateToken from '../middleware/authorization';
 const router = Router();
 
 
-
-router.post('/login', controller.loginUserNew);
 router.post('/register', controller.register);
-router.get('/get/all', authenticateToken, controller.getAllUsersNew);
+router.get('/get/:id', authenticateToken, controller.getUsers);
+router.get('/get/', authenticateToken, controller.getUsers);
 
 export default router;

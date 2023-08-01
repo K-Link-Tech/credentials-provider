@@ -7,6 +7,7 @@ const router = Router();
 // handle login
 
 router.get('/validate', extractJWT, controller.validateToken);
+router.post('/login', controller.loginUser);
 
 
 export default router;

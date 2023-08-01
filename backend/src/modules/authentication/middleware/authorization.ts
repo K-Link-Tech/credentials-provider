@@ -19,7 +19,7 @@ function authenticateToken( req: Request , res: Response, next : NextFunction ){
         if (error) {
             return res.status(403).json({error: getErrorMessage(error)});
         }
-        res.locals.jwt = payload;
+        res.locals.verified = payload;
         return next(); 
     });
 };
