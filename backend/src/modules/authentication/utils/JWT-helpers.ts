@@ -8,7 +8,7 @@ import config from '../config/config';
 
 dotenv.config({path: resolve(__dirname, "../../../../.env")});
 
-const NAMESPACE = "Auth";
+const NAMESPACE = "Auth/JWT-helpers";
 
 // function jwtTokens(user: User) {
 //     const accessSecret = process.env.ACCESS_TOKEN_SECRET || "";
@@ -60,7 +60,7 @@ const verifyJWT = <T>(token: string, tokenType: string): T | void => {
             if (error) {
                 return error;
             } else {
-                logging.info(NAMESPACE, ` ${tokenType} validated.`);
+                logging.info(NAMESPACE, `${tokenType} validated.`);
                 return decoded; 
             }
         });

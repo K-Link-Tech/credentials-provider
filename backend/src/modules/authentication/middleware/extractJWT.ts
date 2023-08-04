@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { verifyJWT } from "../utils/JWT-helpers";
 import config from "../config/config";
 
-const NAMESPACE = "Auth";
+const NAMESPACE = "Auth/extractJWT";
 
 const extractBothJWT = (req: Request, res: Response, next: NextFunction) => {
     logging.info(NAMESPACE, "Validating token...");

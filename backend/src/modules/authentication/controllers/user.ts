@@ -10,14 +10,41 @@ import logging from '../config/logging.config';
 
 const NAMESPACE = "User";
 
-const refreshAccessToken = (req: Request, res: Response, next: NextFunction) => {
+const refreshAccessToken = async (req: Request, res: Response, next: NextFunction) => {
     logging.info(NAMESPACE, "Refresh token validated, user is authorized.");
-    // TODO: Implement the refresh token
-
+    const { id } = res.locals.refreshPayload;
+    try {
+        const userRequested =  await db.select().from(users).where(sql`${users.id} = ${id}`)
+        if (userRequested.length == 0) {
+            logging.error(NAMESPACE, "Uuid given cannot be found!", new Error("Uuid does not exist in database."));
+            return res.status(404).json({ message: "User does not exist."});
+        }
+        signJWT(userRequested[0], "accessPrivateKey", (_error, payload) => {
+            if (_error) {
+                return res.status(401).json({
+                    message: "JWT access token signing failed!",
+                    error: _error
+                });
+            } else if (payload) {
+                logging.info(NAMESPACE, "---------END OF ACCESS TOKEN REFRESH PROCESS---------");
+                return res.status(200).json({
+                    message: "Refreshing of accessToken successful.",
+                    accessSigningPayload: payload,
+                    userType: userRequested[0]
+                });
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: errorMessage(error),
+            error: error
+        });
+    }
 };
 
 const validateToken = (req: Request, res: Response, next: NextFunction) => {
     logging.info(NAMESPACE, "Token validated, user is authorized.");
+    logging.info(NAMESPACE, "---------END OF TOKEN VALIDATION PROCESS---------");
 
     return res.status(200).json({
         message: "Authorized user.",
@@ -40,7 +67,8 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
             return res.status(403).json({ message: "User already exist." })
         }); // Return 403 error if exist record, else carry on.
         logging.info(NAMESPACE, "Data has been sent to database.");
-        logging.info(NAMESPACE, "Data displayed.");        
+        logging.info(NAMESPACE, "Data displayed.");   
+        logging.info(NAMESPACE, "---------END OF REGISTRATION PROCESS---------")     
         return res.status(201).json({users: req.body});
     } catch (error) {
         return res.status(500).get(errorMessage(error));
@@ -82,10 +110,11 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
                     if (_error) {
                         return res.status(401).json({
                             message: "JWT access token signing failed!",
-                            error
+                            error: _error
                         });
                     } else if (payload) {
                         const refreshSigningPayload = res.locals.refreshPayload;
+                        logging.info(NAMESPACE, "---------END OF LOGIN PROCESS---------")
                         return res.status(200).json({
                             message: "Both tokens authentication successful.",
                             accessSigningPayload: payload,
@@ -99,8 +128,8 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
     } catch (error) {
         return res.status(500).json({
             message: errorMessage(error),
-            error
-        })
+            error: error 
+        });
     }
 };
 
@@ -114,7 +143,9 @@ const getUsers = async (req: Request, res: Response, next: NextFunction) => {
             logging.error(NAMESPACE, "Uuid given cannot be found!", error);
             return res.status(404).json({ message: "User does not exist."});
         });
-        logging.info(NAMESPACE, "Data has been fetched... \nDisplaying now: \n"); // ask why does this still run even when the callback has been called above for uuids that don't exist.
+        logging.info(NAMESPACE, "Data has been fetched... \nDisplaying now... \n"); // ask why does this still run even when the callback has been called above for uuids that don't exist.
+        logging.info(NAMESPACE, "---------END OF GET USERS PROCESS---------")
+
         return res.status(200).json({
             users : usersRequested,
             payload : res.locals.verified
@@ -123,7 +154,7 @@ const getUsers = async (req: Request, res: Response, next: NextFunction) => {
         logging.error(NAMESPACE, "Get request failed!\n", error);
         return res.status(500).json({ 
             message: errorMessage(error),
-            error 
+            error: error 
         });
     }
 };
