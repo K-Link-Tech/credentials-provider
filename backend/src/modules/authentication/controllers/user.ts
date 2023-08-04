@@ -2,13 +2,19 @@ import db from '../config/db';
 import bcrypt from "bcrypt";
 import { eq, sql } from "drizzle-orm";
 import { NextFunction, Request, Response, } from 'express';
-import { signJWT } from '../utils/signJWT';
+import { signJWT } from '../utils/JWT-helpers';
 import userType from '../interfaces/user.interface';
 import errorMessage from '../../../../errorHandler';
 import { users } from '../schema/users.schema';
 import logging from '../config/logging.config';
 
 const NAMESPACE = "User";
+
+const refreshAccessToken = (req: Request, res: Response, next: NextFunction) => {
+    logging.info(NAMESPACE, "Refresh token validated, user is authorized.");
+    // TODO: Implement the refresh token
+
+};
 
 const validateToken = (req: Request, res: Response, next: NextFunction) => {
     logging.info(NAMESPACE, "Token validated, user is authorized.");
@@ -56,29 +62,34 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
                     message: "Incorrect password!",
                 });
             } else if (result) {
-                signJWT(usersInDB[0], "sign refresh token", (_error, refreshToken) => {
-                    if (_error) {
-                        return res.status(401).json({
-                            message: "JWT refresh token signing failed!",
-                            error
-                        });
-                    } else if (refreshToken) {
-                        logging.info(NAMESPACE, "Refresh token signed and stored in locals.");
-                        res.locals.refreshToken = refreshToken;
-                    }
-                });
-                signJWT(usersInDB[0], "sign access token", (_error, accessToken) => {
+                try {
+                    signJWT(usersInDB[0], "refreshPrivateKey", (_error, payload) => {
+                        if (_error) {
+                            throw _error;
+                        } else if (payload) {
+                            logging.info(NAMESPACE, "Refresh token signed and stored in locals.");
+                            res.locals.refreshPayload = payload;
+                        }
+                    });
+                } catch (error) {
+                    return res.status(401).json({
+                        message: "JWT refresh token signing failed!",
+                        error: error
+                    });
+                }
+                
+                signJWT(usersInDB[0], "accessPrivateKey", (_error, payload) => {
                     if (_error) {
                         return res.status(401).json({
                             message: "JWT access token signing failed!",
                             error
                         });
-                    } else if (accessToken) {
-                        const refreshToken = res.locals.refreshToken;
+                    } else if (payload) {
+                        const refreshSigningPayload = res.locals.refreshPayload;
                         return res.status(200).json({
                             message: "Both tokens authentication successful.",
-                            access_Token: accessToken,
-                            refresh_Token: refreshToken,
+                            accessSigningPayload: payload,
+                            refreshSigningPayload: refreshSigningPayload,
                             userType: usersInDB[0] 
                         });
                     }
@@ -122,6 +133,7 @@ export default {
     validateToken,
     register,
     loginUser,
+    refreshAccessToken,
     getUsers
 }
 
