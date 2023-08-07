@@ -69,7 +69,10 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
         logging.info(NAMESPACE, "Data has been sent to database.");
         logging.info(NAMESPACE, "Data displayed.");   
         logging.info(NAMESPACE, "---------END OF REGISTRATION PROCESS---------")     
-        return res.status(201).json({users: req.body});
+        return res.status(201).json({
+            message: "The following user has been registered:",
+            users: req.body
+        });
     } catch (error) {
         return res.status(500).get(errorMessage(error));
     }
@@ -116,7 +119,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
                         const refreshSigningPayload = res.locals.refreshPayload;
                         logging.info(NAMESPACE, "---------END OF LOGIN PROCESS---------")
                         return res.status(200).json({
-                            message: "Both tokens authentication successful.",
+                            message: "Both tokens authentication successful. Login Success!",
                             accessSigningPayload: payload,
                             refreshSigningPayload: refreshSigningPayload,
                             userType: usersInDB[0] 
@@ -147,6 +150,7 @@ const getUsers = async (req: Request, res: Response, next: NextFunction) => {
         logging.info(NAMESPACE, "---------END OF GET USERS PROCESS---------")
 
         return res.status(200).json({
+            message: "Here are the user(s):",
             users : usersRequested,
             payload : res.locals.verified
         });
@@ -159,12 +163,73 @@ const getUsers = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
+// module to delete a specific user in db
+const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+    const id: string = req.params.id; // getting the id parameter that is in the routes, it comes in as a string
+    
+    try {
+        logging.info(NAMESPACE, "Deleting user from database.");
+        const deletedUser = await db.delete(users).where(eq(users.id, id)).returning().catch( (error) => {
+            logging.error(NAMESPACE, "Uuid given cannot be found!", error);
+            return res.status(404).json({ message: "User does not exist."});
+        });
+
+        if (deletedUser) {
+            logging.info(NAMESPACE, "The following user has been deleted... \nDisplaying now... \n"); 
+            logging.info(NAMESPACE, "", deletedUser);
+            logging.info(NAMESPACE, "---------END OF DELETE USER PROCESS---------");
+
+            return res.status(200).json({
+                message: "The following user has been deleted from database:",
+                user : deletedUser,
+                payload : res.locals.verified
+            });
+        }
+    } catch (error) {
+        logging.error(NAMESPACE, "Delete user request failed!\n", error);
+        return res.status(500).json({ 
+            message: errorMessage(error),
+            error: error 
+        });
+    }
+};
+
+const deleteAllUsers = async (req: Request, res: Response, next: NextFunction) => {    
+    try {
+        logging.info(NAMESPACE, "Deleting all users from database.");
+        const usersDeleted = (await db.delete(users).returning());
+
+        if (usersDeleted) {
+            logging.info(NAMESPACE, "The following users has been deleted... \nDisplaying now... \n"); 
+            logging.info(NAMESPACE, "---------END OF DELETE ALL USERS PROCESS---------")
+
+            return res.status(200).json({
+                message: "The following users has been deleted from database:",
+                users : usersDeleted,
+                payload : res.locals.verified
+            });
+        }
+    } catch (error) {
+        logging.error(NAMESPACE, "Delete all request failed!\n", error);
+        return res.status(500).json({ 
+            message: errorMessage(error),
+            error: error 
+        });
+    }
+};
+
+const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+    
+};
 
 export default {
     validateToken,
     register,
     loginUser,
     refreshAccessToken,
-    getUsers
+    getUsers,
+    deleteUser,
+    deleteAllUsers,
+    updateUser
 }
 
