@@ -1,9 +1,9 @@
 # node modules
 node_modules
-backend/.env
 backend/private-key.pem
 backend/public-key.pem
 backend/keys/access-public-key.pem
 backend/keys/access-private-key.pem
 backend/keys/refresh-private-key.pem
 backend/keys/refresh-public-key.pem
+.env*
