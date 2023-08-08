@@ -7,6 +7,7 @@ import userType from '../interfaces/user.interface';
 import errorMessage from '../../../../errorHandler';
 import { users } from '../schema/users.schema';
 import logging from '../config/logging.config';
+import User from '../interfaces/user.interface';
 
 const NAMESPACE = "User";
 
@@ -83,14 +84,19 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         logging.info(NAMESPACE, "Login info received.");
         const usersInDB = await db.select().from(users).where(eq(users.email,email));
-        logging.info(NAMESPACE, "Users info retrieved from database.");
-        if (usersInDB.length == 0)
-        return res.status(401).json({error: "Email is incorrect or not registered."});
+        logging.info(NAMESPACE, "Users info retrieved from database.", usersInDB);
+        if (usersInDB.length == 0) {
+            return res.status(401).json({error: "Email is incorrect or not registered."});
+        }
         
         bcrypt.compare(password, usersInDB[0].password, (error, result) => {
+            logging.debug(NAMESPACE, "error for bcrypt compare", error);
+
+            logging.debug(NAMESPACE, "result for bcrypt compare", result);
             if (error) {
-                return res.status(401).json({
-                    message: "Incorrect password!",
+                return res.status(400).json({
+                    message: errorMessage(error),
+                    error: error
                 });
             } else if (result) {
                 try {
@@ -122,9 +128,13 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
                             message: "Both tokens authentication successful. Login Success!",
                             accessSigningPayload: payload,
                             refreshSigningPayload: refreshSigningPayload,
-                            userType: usersInDB[0] 
+                            user: usersInDB[0] 
                         });
                     }
+                });
+            } else {
+                return res.status(401).json({
+                    message: "Incorrect password!",
                 });
             }
         });
@@ -219,7 +229,66 @@ const deleteAllUsers = async (req: Request, res: Response, next: NextFunction) =
 };
 
 const updateUser = async (req: Request, res: Response, next: NextFunction) => {
-    
+    const id: string = req.params.id; // getting the id parameter that is in the routes, it comes in as a string
+    let { name, email, password } = req.body;
+    if (Object.keys(req.body).length === 0) {
+        return res.status(400).json({
+            message: "Update request body cannot be empty!"
+        });
+    }
+
+    try {
+        logging.info(NAMESPACE, "Updating user in database.");
+        const originalUser = await db.select().from(users).where(eq(users.id, id)).catch( (error) => {
+            logging.error(NAMESPACE, "Uuid given cannot be found!", error);
+            return res.status(404).json({ message: "User does not exist."});
+        });
+        let updated: boolean = false;
+        if (name) {
+            await db.update(users).set({name: name}).where(eq(users.id, id));
+            updated = true;
+        }
+        if (email) {
+            await db.update(users).set({email: email}).where(eq(users.id, id));
+            updated = true;
+        }
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await db.update(users).set({password: hashedPassword}).where(eq(users.id, id));
+            updated = true;
+        }
+        
+        const updatedUser = await db.select().from(users).where(eq(users.id, id)).catch( (error) => {
+            logging.error(NAMESPACE, "Uuid given cannot be found!", error);
+            return res.status(404).json({ message: "User does not exist."});
+        });
+
+        if (updated) {
+            logging.info(NAMESPACE, "The following user has been updated... \nDisplaying now... \n"); 
+            logging.info(NAMESPACE, "", updatedUser);
+            logging.info(NAMESPACE, "---------END OF UPDATE USER PROCESS---------");
+
+            return res.status(200).json({
+                message: "The following user has been updated in database:",
+                originalUser: originalUser,
+                updatedUser: updatedUser,
+                payload: res.locals.verified
+            });
+        } else {
+            return res.status(501).json({
+                message: "The update process has failed for the user below, please check request body parameters.",
+                originalUser: originalUser,
+                updatedUser: updatedUser,
+                payload: res.locals.verified
+            });
+        }
+    } catch (error) {
+        logging.error(NAMESPACE, "Update user request failed!\n", error);
+        return res.status(500).json({ 
+            message: errorMessage(error),
+            error: error 
+        });
+    }
 };
 
 export default {

@@ -55,19 +55,14 @@ const verifyJWT = <T>(token: string, tokenType: string): T | void => {
     const tokenUsed = (tokenType == "accessPublicKey") ? config.server.token.accessPublicKey : config.server.token.refreshPublicKey;
     const publicKey = Buffer.from(tokenUsed, 'base64').toString('ascii');
 
-    try {
-        return jwt.verify(token, publicKey, (error, decoded) => {
-            if (error) {
-                return error;
-            } else {
-                logging.info(NAMESPACE, `${tokenType} validated.`);
-                return decoded; 
-            }
-        });
-        
-    } catch (error) {
-        logging.error(NAMESPACE, errorMessage(error), error);
-    }
+    return jwt.verify(token, publicKey, (error, decoded) => {
+        if (error) {
+            throw error;
+        } else {
+            logging.info(NAMESPACE, `${tokenType} validated.`);
+            return decoded; 
+        }
+    });
 };
 
 export {

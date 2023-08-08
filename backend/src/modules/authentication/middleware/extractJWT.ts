@@ -13,30 +13,29 @@ const extractBothJWT = (req: Request, res: Response, next: NextFunction) => {
     let refreshToken = req.headers.authorization?.split(' ')[2];
 
     if (accessToken && refreshToken) {
-        const accessDecoded = verifyJWT(accessToken, "accessPublicKey");
-        if (accessDecoded instanceof Error) {
-            logging.error(NAMESPACE, "Access token given is invalid!")
-            return res.status(404).json({
-                message: accessDecoded.message,
-                accessDecoded
-            });
-        } else {
+        try {
+            const accessDecoded = verifyJWT(accessToken, "accessPublicKey");
             logging.info(NAMESPACE, "Access token validated.");
             res.locals.accessPayload = accessDecoded; // passing the decoded to the endpoint, saving the variable to the middleware that is going to use this payload next
             logging.info(NAMESPACE, "Access token stored in locals.");
-        }
-        const refreshDecoded = verifyJWT(refreshToken, "refreshPublicKey");
-        if (refreshDecoded instanceof Error) {
-            logging.error(NAMESPACE, "Refresh token given is invalid!")
-            return res.status(404).json({
-                message: refreshDecoded.message,
-                refreshDecoded
+
+        } catch (error) {
+            return res.status(401).json({
+                message: "Access token validation error:",
+                error: error
             });
-        } else {
+        }
+        try {
+            const refreshDecoded = verifyJWT(refreshToken, "refreshPublicKey");
             logging.info(NAMESPACE, "Refresh token validated.");
             res.locals.refreshPayload = refreshDecoded; // passing the decoded to the endpoint, saving the variable to the middleware that is going to use this payload next
             logging.info(NAMESPACE, "Refresh token stored in locals.");
             next();
+        } catch (error) {
+            return res.status(401).json({
+                message: "Refresh token validation error:",
+                error: error
+            });
         }
     } else {
         logging.error(NAMESPACE, "User is unauthorized!")
@@ -49,22 +48,20 @@ const extractBothJWT = (req: Request, res: Response, next: NextFunction) => {
 const extractRefreshJWT = (req: Request, res: Response, next: NextFunction) => {
     logging.info(NAMESPACE, "Validating token...");
 
-    let accessToken = req.headers.authorization?.split(' ')[1];
     let refreshToken = req.headers.authorization?.split(' ')[2];
 
     if (refreshToken) {
-        const refreshDecoded = verifyJWT(refreshToken, "refreshPublicKey");
-        if (refreshDecoded instanceof Error) {
-            logging.error(NAMESPACE, "Refresh token given is invalid!")
-            return res.status(404).json({
-                message: refreshDecoded.message,
-                refreshDecoded
-            });
-        } else {
+        try {
+            const refreshDecoded = verifyJWT(refreshToken, "refreshPublicKey");
             logging.info(NAMESPACE, "Refresh token validated.");
             res.locals.refreshPayload = refreshDecoded; // passing the decoded to the endpoint, saving the variable to the middleware that is going to use this payload next
             logging.info(NAMESPACE, "Refresh token stored in locals.");
             next();
+        } catch (error) {
+            return res.status(401).json({
+                message: "Refresh token validation error:",
+                error: error
+            });
         }
     } else {
         logging.error(NAMESPACE, "User is unauthorized!")
