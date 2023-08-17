@@ -1,4 +1,4 @@
-import express, { Express, Request, Response, Router } from 'express';
+import { Request, Response, Router } from 'express';
 import handler from '../handlers/auth';
 import { routerEnclose } from '../utils/routerEnclose';
 import { extractBothJWT, extractRefreshJWT } from '../middleware/extractJWT';
@@ -10,7 +10,7 @@ router.post('/register', handler.register);
 
 router.post(
     '/login', 
-    routerEnclose(handler.loginUser, ( req: Request, res: Response ) => {
+    routerEnclose(handler.loginUser, ( req: Request ) => {
         const body: LoginReq = req.body; 
         return {
             source: "express",

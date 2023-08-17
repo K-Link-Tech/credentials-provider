@@ -136,6 +136,13 @@ const loginUser: eventHandler = async (event) => {
                     };
                 }
             });
+            return {
+                statusCode: 200,
+                data: {
+                    message: "Both tokens authentication successful. Login Success!",
+                    user: usersInDB[0]
+                } 
+            };
         } else {
                 return {
                     statusCode: 401,

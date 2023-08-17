@@ -3,10 +3,10 @@ import { resolve } from 'path';
 
 dotenv.config({path: resolve(__dirname, "../../../../.env")});
 
-const POSTGRES_HOST = process.env.MYSQL_HOST || 'localhost';
-const POSTGRES_DATABASE = process.env.MYSQL_DATABASE || 'credential_provider';
-const POSTGRES_USER = process.env.MYSQL_HOST || 'postgres';
-const POSTGRES_PASS = process.env.MYSQL_HOST || 'Micahsim00**';
+const POSTGRES_HOST = process.env.POSTGRES_HOST || 'localhost';
+const POSTGRES_DATABASE = process.env.POSTGRES_DATABASE || 'credential_provider';
+const POSTGRES_USER = process.env.POSTGRES_USER || 'postgres';
+const POSTGRES_PASS = process.env.POSTGRES_PASS || 'Micahsim00**';
 
 const POSTGRES = {
     host: POSTGRES_HOST,

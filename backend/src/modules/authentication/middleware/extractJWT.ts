@@ -1,8 +1,6 @@
 import logging from "../config/logging.config";
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 import { verifyJWT } from "../utils/JWT-helpers";
-import config from "../config/config";
 
 const NAMESPACE = "Auth/extractJWT";
 
