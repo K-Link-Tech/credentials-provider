@@ -2,25 +2,29 @@ import db from '../config/db';
 import bcrypt from "bcrypt";
 import { eq, sql } from "drizzle-orm";
 import { Request, Response, } from 'express';
-import userType from '../interfaces/user.interface';
 import errorMessage from '../../../../errorHandler';
 import { users } from '../schema/users.schema';
 import logging from '../config/logging.config';
-import User from '../interfaces/user.interface';
+import { GetReq } from '../interfaces/usersRequest.interface';
 
 const NAMESPACE = "User-routes";
 
-type handlerInput = {
-    source: string,
-    payload: any
-}
+type event = {
+    source: string
+    payload: Object
+};
+
+type eventHandler = ( event: event ) => Object;
+
 
 // module to fetch all or specific user(s) in db
-const getUsers = async (event: handlerInput) => {
-    const id: string = event.payload; // getting the id parameter that is in the routes, it comes in as a string
+const getUsers:eventHandler = async (event) => {
+    // getting the id parameter that is in the routes, it comes in as a string
+    const { id } = event.payload as GetReq; 
     // if id == null means the person is trying to get all users
     try {
-        logging.info(NAMESPACE, "Fetching data from database.");
+        logging.info(NAMESPACE, "Fetching data from database. Type of id:", typeof(id));
+        logging.debug(NAMESPACE, "id: ", id);
         const usersRequested = (id == null) ? await db.select().from(users) : await db.select().from(users).where(sql`${users.id} = ${id}`).catch( (error) => {
             logging.error(NAMESPACE, "Uuid given cannot be found!", error);
             return {

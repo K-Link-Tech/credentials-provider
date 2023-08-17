@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express';
 import handler from '../handlers/auth';
 import { routerEnclose } from '../utils/routerEnclose';
 import { extractBothJWT, extractRefreshJWT } from '../middleware/extractJWT';
-import { LoginReq, RegisterReq } from '../interfaces/authRequest.interface';
+import { LoginReq, RefreshAccessReq, RegisterReq } from '../interfaces/authRequest.interface';
 
 const router = Router();
 
@@ -29,7 +29,18 @@ router.post(
 );
 
 router.get('/validate', extractBothJWT, handler.validateToken);
-router.get('/refresh', extractRefreshJWT, handler.refreshAccessToken)
+
+router.get(
+    '/refresh', 
+    extractRefreshJWT, 
+    routerEnclose(handler.refreshAccessToken, ( req: Request) => {
+        const body: RefreshAccessReq = req.body
+        return {
+            source: "express",
+            payload: body
+        }
+    })
+);
 
 
 export default router;
