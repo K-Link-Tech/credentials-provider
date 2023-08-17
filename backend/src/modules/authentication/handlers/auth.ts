@@ -28,21 +28,13 @@ const refreshAccessToken = async (req: Request, res: Response) => {
             logging.error(NAMESPACE, "Uuid given cannot be found!", new Error("Uuid does not exist in database."));
             return res.status(404).json({ message: "User does not exist."});
         }
-        signJWT(userRequested[0], "accessPrivateKey", (_error, payload) => {
-            if (_error) {
-                return res.status(401).json({
-                    message: "JWT access token signing failed!",
-                    error: _error
-                });
-            } else if (payload) {
-                logging.info(NAMESPACE, "---------END OF ACCESS TOKEN REFRESH PROCESS---------");
-                return res.status(200).json({
-                    message: "Refreshing of accessToken successful.",
-                    accessSigningPayload: payload,
-                    userType: userRequested[0]
-                });
-            }
-        });
+        const accessToken = signJWT(userRequested[0], "accessPrivateKey");
+        logging.info(NAMESPACE, "---------END OF ACCESS TOKEN REFRESH PROCESS---------");
+        return res.status(200).json({
+            message: "Refreshing of accessToken successful.",
+            accessSigningPayload: accessToken,
+            userType: userRequested[0]
+        })
     } catch (error) {
         return res.status(500).json({
             message: errorMessage(error),
@@ -87,12 +79,9 @@ const register = async (req: Request, res: Response) => {
     }
 };
 
-
 const loginUser: eventHandler = async (event) => {
     const {email} = event.payload as LoginReq;
     const {password} = event.payload as LoginReq;
-    logging.debug(NAMESPACE, "email: ", email);
-    logging.debug(NAMESPACE, "password: ", password);
     try {
         logging.info(NAMESPACE, "Login info received.");
         const usersInDB = await db.select().from(users).where(eq(users.email,email));
@@ -103,43 +92,19 @@ const loginUser: eventHandler = async (event) => {
                 error: new Error("Email is incorrect or not registered.")
             };
         }
-        
-        let refreshToken: string, accessToken: string;
 
         const result = bcrypt.compareSync(password, usersInDB[0].password);
         if (result) {
-            signJWT(usersInDB[0], "refreshPrivateKey", (_error, payload) => {
-                if (_error) {
-                    logging.error(NAMESPACE, "Refresh token signing failed.", _error);
-                    throw _error;
-                } else if (payload) {
-                    logging.info(NAMESPACE, "Refresh token signed and stored in locals.");
-                    refreshToken = payload;
-                }
-            });
+            const refreshToken = signJWT(usersInDB[0], "refreshPrivateKey");
             
-            signJWT(usersInDB[0], "accessPrivateKey", (_error, payload) => {
-                if (_error) {
-                    logging.error(NAMESPACE, "Refresh token signing failed.", _error);
-                    throw _error;
-                } else if (payload) {
-                    logging.info(NAMESPACE, "---------END OF LOGIN PROCESS---------")
-                    accessToken = payload;
-                    return {
-                        statusCode: 200,
-                        data: {
-                            message: "Both tokens authentication successful. Login Success!",
-                            accessToken: accessToken,
-                            refreshToken: refreshToken,
-                            user: usersInDB[0]
-                        } 
-                    };
-                }
-            });
+            const accessToken = signJWT(usersInDB[0], "accessPrivateKey");
+            
             return {
                 statusCode: 200,
                 data: {
                     message: "Both tokens authentication successful. Login Success!",
+                    accessToken: accessToken,
+                    refreshToken: refreshToken,
                     user: usersInDB[0]
                 } 
             };

@@ -14,7 +14,7 @@ const NAMESPACE = "routerEnclose";
 export const routerEnclose: routerEncloseFunction = (fn, formatExchange) => (req, res) => {
     fn(formatExchange ? formatExchange(req) : req).then(
         (returnObject: handlerReturnObject) => {
-            logging.debug(NAMESPACE, "testing type of statusCode: ", typeof(returnObject))
+            logging.info(NAMESPACE, "testing type of statusCode: ", typeof(returnObject))
             if (returnObject.statusCode >= 200 && returnObject.statusCode < 300) {
                 return res.status(returnObject.statusCode).json(returnObject.data);
             } else {

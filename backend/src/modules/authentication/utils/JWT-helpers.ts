@@ -10,35 +10,27 @@ dotenv.config({path: resolve(__dirname, "../../../../.env")});
 
 const NAMESPACE = "Auth/JWT-helpers";
 
-const signJWT = (user: User, tokenType: string, callback: (error: Error | null, token: string | null) => void): void => {
+const signJWT = (user: User, tokenType: string): string | Error => {
     logging.info(NAMESPACE, `Attempting to sign ${tokenType} for ${user.name}...`);
     const tokenUsed = (tokenType == "accessPrivateKey") ? config.server.token.accessPrivateKey : config.server.token.refreshPrivateKey;
     const privateKey = Buffer.from(tokenUsed, 'base64').toString('ascii');
 
     try {
-        jwt.sign(
-            {
+        const token = jwt.sign({
                 id: user.id,
                 name: user.name,
                 email: user.email
-            }, privateKey, 
-            {
+            }, privateKey, {
                 issuer: config.server.token.issuer,
                 algorithm: 'RS256',
                 expiresIn: (tokenType == "accessPrivateKey") ? '15m' : '1d'
-            }, (error, token) => {
-                if (error) {
-                    logging.info(NAMESPACE, `${tokenType} signing error occurred.`)
-                    callback(error, null);
-                } else if (token) {
-                    logging.info(NAMESPACE, `The ${tokenType} for ${user.name} is successful!`);
-                    callback(null, token);
-                }
             }
         );
+        logging.info(NAMESPACE, `Signing ${tokenType} for ${user.name} successful!`);
+        return token;
     } catch (error) {
         logging.error(NAMESPACE, errorMessage(error), error);
-        throw new Error(`Error while signing ${tokenType} jwt.`);
+        return new Error(`Error while signing ${tokenType} jwt.`);
     }
 };
 
