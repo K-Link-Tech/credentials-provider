@@ -2,11 +2,20 @@ import { Request, Response, Router } from 'express';
 import handler from '../handlers/auth';
 import { routerEnclose } from '../utils/routerEnclose';
 import { extractBothJWT, extractRefreshJWT } from '../middleware/extractJWT';
-import { LoginReq } from '../interfaces/authRequest.interface';
+import { LoginReq, RegisterReq } from '../interfaces/authRequest.interface';
 
 const router = Router();
 
-router.post('/register', handler.register);
+router.post(
+    '/register', 
+    routerEnclose(handler.register, ( req: Request ) => {
+        const body: RegisterReq = req.body; 
+        return {
+            source: "express",
+            payload: body
+        }
+    })
+);
 
 router.post(
     '/login', 

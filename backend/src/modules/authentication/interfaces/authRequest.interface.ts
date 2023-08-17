@@ -3,7 +3,13 @@ interface LoginReq {
     password: string;
 }
 
+interface RegisterReq {
+    name: string;
+    email: string;
+    password: string;
+}
 
 export {
-    LoginReq
+    LoginReq,
+    RegisterReq
 }

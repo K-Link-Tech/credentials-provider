@@ -3,12 +3,11 @@ import bcrypt from "bcrypt";
 import { eq, sql } from "drizzle-orm";
 import { NextFunction, Request, Response, } from 'express';
 import { signJWT } from '../utils/JWT-helpers';
-import userType from '../interfaces/user.interface';
 import errorMessage from '../../../../errorHandler';
 import { users } from '../schema/users.schema';
-import { LoginReq } from '../interfaces/authRequest.interface';
+import { LoginReq, RegisterReq } from '../interfaces/authRequest.interface';
 import logging from '../config/logging.config';
-import User from '../interfaces/user.interface';
+import getErrorMessage from '../../../../errorHandler';
 
 const NAMESPACE = "Auth-route";
 
@@ -54,8 +53,8 @@ const validateToken = (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
-const register = async (req: Request, res: Response) => {
-    let { name, email, password } = req.body;
+const register: eventHandler = async (event) => {
+    const { name, email, password } = event.payload as RegisterReq;
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         logging.info(NAMESPACE,"Password hashed!");
@@ -63,19 +62,23 @@ const register = async (req: Request, res: Response) => {
             name: name,
             email: email,
             password: hashedPassword
-        }).catch( (error) => {
-            logging.error(NAMESPACE,error.message, error);
-            return res.status(403).json({ message: "User already exist." })
-        }); // Return 403 error if exist record, else carry on.
+        });
         logging.info(NAMESPACE, "Data has been sent to database.");
         logging.info(NAMESPACE, "Data displayed.");   
         logging.info(NAMESPACE, "---------END OF REGISTRATION PROCESS---------")     
-        return res.status(201).json({
-            message: "The following user has been registered:",
-            users: req.body
-        });
+        return {
+            statusCode: 201,
+            data: {
+                message: "The following user has been registered:",
+                users: event.payload
+            }
+        };
     } catch (error) {
-        return res.status(500).get(errorMessage(error));
+        logging.error(NAMESPACE, getErrorMessage(error) , error);
+        return {
+            statusCode: 403,
+            error: new Error("User already exists.")
+        };
     }
 };
 

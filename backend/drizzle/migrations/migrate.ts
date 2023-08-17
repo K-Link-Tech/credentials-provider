@@ -1,11 +1,12 @@
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
+import config from "../../src/modules/authentication/config/config";
 
 const doMigrate = async () => {
     try {
         // replace this with production server connection string in future
-        const connectionString = "postgres://postgres:Micahsim00**@localhost:5432/credential_provider"
+        const connectionString = `postgres://${config.drizzle.user}:${config.drizzle.pass}@${config.drizzle.host}:${config.server.port}/${config.drizzle.database}`;
         const credentialProviderPG = postgres(connectionString, { max: 1 })
         const db = drizzle(credentialProviderPG);
 
