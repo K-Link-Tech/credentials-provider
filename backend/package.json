@@ -4,8 +4,8 @@
   "description": "Node.js based credentials-provider",
   "main": "index.ts",
   "scripts": {
-    "dev": "nodemon ./src/modules/authentication/index",
-    "start": "node ./src/modules/authentication/index",
+    "dev": "nodemon ./src/modules/authentication/routes/index.ts",
+    "start": "node ./src/modules/authentication/routes/index.ts",
     "db:generate": "drizzle-kit generate:pg --config=./src/modules/authentication/config/drizzle.config.ts",
     "db:delete": "drizzle-kit drop --config=./src/modules/authentication/config/drizzle.config.ts",
     "db:push": "drizzle-kit push:pg --config=./src/modules/authentication/config/drizzle.config.ts",
@@ -37,6 +37,7 @@
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
+    "@types/joi": "^17.2.3",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^20.4.5",
     "@types/pg": "^8.10.2",

@@ -3,8 +3,9 @@ import { resolve } from 'path';
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from 'cookie-parser';
-import userRouter from "./routes/users-routes";
-import authRouter from "./routes/auth-routes";
+import userRouter from "./users-routes";
+import authRouter from "./auth-routes";
+import authenticateToken from '../middleware/authorization';
 
 dotenv.config({path: resolve(__dirname, "../../../.env")});
 
@@ -17,7 +18,7 @@ app.use(json());
 app.use(cookieParser());
 
 
-app.use('/api/users', userRouter);
+app.use('/api/users', authenticateToken, userRouter);
 app.use('/api/auth', authRouter);
 
 app.get('/', (req: Request, res: Response) => {

@@ -10,14 +10,6 @@ dotenv.config({path: resolve(__dirname, "../../../../.env")});
 
 const NAMESPACE = "Auth/JWT-helpers";
 
-// function jwtTokens(user: User) {
-//     const accessSecret = process.env.ACCESS_TOKEN_SECRET || "";
-//     const refreshSecret = process.env.REFRESH_TOKEN_SECRET || "";
-//     const accessToken = jwt.sign(user, accessSecret, {expiresIn:'15m'});
-//     const refreshToken = jwt.sign(user, refreshSecret, {expiresIn:'1d'});
-//     return ({accessToken, refreshToken});
-// };
-
 const signJWT = (user: User, tokenType: string, callback: (error: Error | null, token: string | null) => void): void => {
     logging.info(NAMESPACE, `Attempting to sign ${tokenType} for ${user.name}...`);
     const tokenUsed = (tokenType == "accessPrivateKey") ? config.server.token.accessPrivateKey : config.server.token.refreshPrivateKey;
@@ -46,7 +38,7 @@ const signJWT = (user: User, tokenType: string, callback: (error: Error | null, 
         );
     } catch (error) {
         logging.error(NAMESPACE, errorMessage(error), error);
-        callback(new Error(`Error while signing ${tokenType} jwt.`), null);
+        throw new Error(`Error while signing ${tokenType} jwt.`);
     }
 };
 

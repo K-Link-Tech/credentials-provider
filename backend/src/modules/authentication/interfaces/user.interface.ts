@@ -1,4 +1,3 @@
-
 interface User {
     id: string;
     name: string;
@@ -6,6 +5,6 @@ interface User {
     password: string;
     createdAt: Date;
     updatedAt: Date;
-  }
+}
   
-  export default User;
+export default User;

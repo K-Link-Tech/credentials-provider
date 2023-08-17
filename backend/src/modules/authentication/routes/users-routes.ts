@@ -1,16 +1,33 @@
 import { Router } from 'express';
-import controller from '../controllers/user';
-import authenticateToken from '../middleware/authorization';
+import handler from '../handlers/user';
+import { routerEnclose } from '../utils/routerEnclose';
 
 const router = Router();
 
 
-router.post('/register', controller.register);
-router.get('/:id', authenticateToken, controller.getUsers);
-router.get('/', authenticateToken, controller.getUsers);
-router.delete('/:id', authenticateToken, controller.deleteUser);
-router.delete('/', authenticateToken, controller.deleteAllUsers);
-router.patch('/:id', authenticateToken, controller.updateUser);
+// get users by id
+router.get(
+    '/:id',
+    routerEnclose(handler.getUsers, ( params: string ) => ({
+            source: "express",
+            payload: params
+    }))
+);
+
+// get all users
+router.get(
+    '/', 
+    routerEnclose(handler.getUsers, ( params: string ) => ({
+        source: "express",
+        payload: params
+    }))
+);
+
+router.delete('/:id', handler.deleteUser);
+
+router.delete('/', handler.deleteAllUsers);
+
+router.patch('/:id', handler.updateUser);
 
 
 export default router;
