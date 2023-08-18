@@ -1,10 +1,9 @@
 import db from '../config/db';
 import bcrypt from "bcrypt";
 import { eq, sql } from "drizzle-orm";
-import { NextFunction, Request, Response, } from 'express';
 import { signJWT } from '../utils/JWT-helpers';
 import { users } from '../schema/users.schema';
-import { LoginReq, RefreshAccessReq, RegisterReq } from '../interfaces/authRequest.interface';
+import { DecodedJWTObj, LoginReq, RefreshAccessReq, RegisterReq } from '../interfaces/authRequest.interface';
 import logging from '../config/logging.config';
 import getErrorMessage from '../../../../errorHandler';
 
@@ -19,7 +18,8 @@ type eventHandler = ( event: event ) => Object;
 
 const refreshAccessToken: eventHandler = async (event) => {
     logging.info(NAMESPACE, "Refresh token validated, user is authorized.");
-    const { id } = event.payload as RefreshAccessReq;
+    const { id } = event.payload as DecodedJWTObj;
+    logging.debug(NAMESPACE, "id received: ", id);
     try {
         const userRequested =  await db.select().from(users).where(sql`${users.id} = ${id}`)
         if (userRequested.length == 0) {
@@ -38,7 +38,7 @@ const refreshAccessToken: eventHandler = async (event) => {
                 accessSigningPayload: accessToken,
                 userType: userRequested[0]
             }        
-        }
+        };
     } catch (error) {
         logging.error(NAMESPACE, getErrorMessage(error), error)
         return {
@@ -48,15 +48,17 @@ const refreshAccessToken: eventHandler = async (event) => {
     }
 };
 
-const validateToken = (req: Request, res: Response, next: NextFunction) => {
+const validateToken: eventHandler = async (event) => {
     logging.info(NAMESPACE, "Token validated, user is authorized.");
     logging.info(NAMESPACE, "---------END OF TOKEN VALIDATION PROCESS---------");
-
-    return res.status(200).json({
-        message: "Authorized user.",
-        access_Payload: res.locals.accessPayload,
-        refresh_Payload: res.locals.refreshPayload
-    });
+    const decoded = event.payload;
+    return {
+        statusCode: 200,
+        data: {
+            message: "Authorized user.",
+            decodedSignature: decoded
+        }
+    };
 };
 
 const register: eventHandler = async (event) => {

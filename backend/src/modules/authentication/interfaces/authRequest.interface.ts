@@ -12,11 +12,28 @@ interface RegisterReq {
 }
 
 interface RefreshAccessReq {
-    id: typeof uuid;
+    id: string;
 }
+
+interface extractJWTReq {
+    accessToken?: string,
+    refreshToken: string,
+}
+
+interface DecodedJWTObj {
+    id: string,
+    name: string,
+    email: string,
+    iat: number,
+    exp: number,
+    iss: string
+}
+
 
 export {
     LoginReq,
     RegisterReq,
-    RefreshAccessReq
+    RefreshAccessReq,
+    extractJWTReq,
+    DecodedJWTObj
 }

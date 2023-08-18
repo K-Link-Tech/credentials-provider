@@ -1,71 +1,80 @@
 import logging from "../config/logging.config";
-import { Request, Response, NextFunction } from "express";
 import { verifyJWT } from "../utils/JWT-helpers";
+import { extractJWTReq } from "../interfaces/authRequest.interface";
+import getErrorMessage from "../../../../errorHandler";
 
 const NAMESPACE = "Auth/extractJWT";
 
-const extractBothJWT = (req: Request, res: Response, next: NextFunction) => {
-    logging.info(NAMESPACE, "Validating token...");
+type event = {
+    source: string
+    payload: Object
+};
 
-    let accessToken = req.headers.authorization?.split(' ')[1];
-    let refreshToken = req.headers.authorization?.split(' ')[2];
+type eventHandler = ( event: event ) => Object;
+
+const extractBothJWT: eventHandler = async (event) => {
+    logging.info(NAMESPACE, "Validating token...");
+    const {accessToken, refreshToken} = event.payload as extractJWTReq;
 
     if (accessToken && refreshToken) {
         try {
             const accessDecoded = verifyJWT(accessToken, "accessPublicKey");
             logging.info(NAMESPACE, "Access token validated.");
-            res.locals.accessPayload = accessDecoded; // passing the decoded to the endpoint, saving the variable to the middleware that is going to use this payload next
-            logging.info(NAMESPACE, "Access token stored in locals.");
-
-        } catch (error) {
-            return res.status(401).json({
-                message: "Access token validation error:",
-                error: error
-            });
-        }
-        try {
             const refreshDecoded = verifyJWT(refreshToken, "refreshPublicKey");
             logging.info(NAMESPACE, "Refresh token validated.");
-            res.locals.refreshPayload = refreshDecoded; // passing the decoded to the endpoint, saving the variable to the middleware that is going to use this payload next
-            logging.info(NAMESPACE, "Refresh token stored in locals.");
-            next();
+
+            logging.info(NAMESPACE, "Access & Refresh tokens are stored in req.data as Object.");
+            return {
+                statusCode: 200,
+                data: {
+                    accessDecoded: accessDecoded,
+                    refreshDecoded: refreshDecoded
+                }
+            }
         } catch (error) {
-            return res.status(401).json({
-                message: "Refresh token validation error:",
-                error: error
-            });
+            logging.error(NAMESPACE, getErrorMessage(error), error);
+            return {
+                statusCode: 401,
+                error: new Error("Failed to verify JWT Tokens!")
+            };
         }
     } else {
-        logging.error(NAMESPACE, "User is unauthorized!")
-        return res.status(401).json({
-            message: "Unauthorized!"
-        });
+        logging.error(NAMESPACE, "User is unauthorized!");
+        return {
+            statusCode: 401,
+            error: new Error("User is unauthorized!")
+        };
     }
 };
 
-const extractRefreshJWT = (req: Request, res: Response, next: NextFunction) => {
+const extractRefreshJWT: eventHandler = async (event) => {
     logging.info(NAMESPACE, "Validating token...");
 
-    let refreshToken = req.headers.authorization?.split(' ')[2];
+    const {refreshToken} = event.payload as extractJWTReq;
 
     if (refreshToken) {
         try {
             const refreshDecoded = verifyJWT(refreshToken, "refreshPublicKey");
             logging.info(NAMESPACE, "Refresh token validated.");
-            res.locals.refreshPayload = refreshDecoded; // passing the decoded to the endpoint, saving the variable to the middleware that is going to use this payload next
+            const decoded = refreshDecoded; // passing the decoded to the endpoint, saving the variable to the middleware that is going to use this payload next
             logging.info(NAMESPACE, "Refresh token stored in locals.");
-            next();
+            return {
+                statusCode: 200,
+                data: decoded
+            }
         } catch (error) {
-            return res.status(401).json({
-                message: "Refresh token validation error:",
-                error: error
-            });
+            logging.error(NAMESPACE, getErrorMessage(error), error)
+            return {
+                statusCode: 401,
+                error: new Error("Failed to verify refresh token!")
+            };
         }
     } else {
-        logging.error(NAMESPACE, "User is unauthorized!")
-        return res.status(401).json({
-            message: "Unauthorized!"
-        });
+        logging.error(NAMESPACE, "Unauthorized refresh token!")
+        return {
+            statusCode: 401,
+            error: new Error("User is unauthorized!")
+        };
     }
 };
 
