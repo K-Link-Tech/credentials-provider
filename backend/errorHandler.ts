@@ -1,6 +1,7 @@
 // Declare error format
 type ErrorWithMessage = {
     message: string
+    name: string
 };
 
 function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
@@ -29,4 +30,8 @@ function getErrorMessage(error: unknown) {
     return toErrorWithMessage(error).message;
 };
 
-export default getErrorMessage;
+function getErrorName(error: unknown) {
+    return toErrorWithMessage(error).name;
+};
+
+export { getErrorMessage, getErrorName };

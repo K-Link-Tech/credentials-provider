@@ -3,9 +3,10 @@ import bcrypt from "bcrypt";
 import { eq, sql } from "drizzle-orm";
 import { signJWT } from '../utils/JWT-helpers';
 import { users } from '../schema/users.schema';
-import { DecodedJWTObj, LoginReq, RefreshAccessReq, RegisterReq } from '../interfaces/authRequest.interface';
+import { DecodedJWTObj, LoginReq, RegisterReq } from '../interfaces/authRequest.interface';
 import logging from '../config/logging.config';
-import getErrorMessage from '../../../../errorHandler';
+import { getErrorMessage, getErrorName } from '../../../../errorHandler';
+import { AuthenticationError, DatabaseRequestError } from '../utils/errorTypes';
 
 const NAMESPACE = "Auth-route";
 
@@ -19,15 +20,21 @@ type eventHandler = ( event: event ) => Object;
 const refreshAccessToken: eventHandler = async (event) => {
     logging.info(NAMESPACE, "Refresh token validated, user is authorized.");
     const { id } = event.payload as DecodedJWTObj;
-    logging.debug(NAMESPACE, "id received: ", id);
     try {
-        const userRequested =  await db.select().from(users).where(sql`${users.id} = ${id}`)
+        if (!id) {
+            const e = new DatabaseRequestError("Missing id parameter", "401");
+            throw e;
+        }
+
+        const userRequested =  await db.select().from(users).where(sql`${users.id} = ${id}`).catch((error) => {
+            logging.error(NAMESPACE, getErrorMessage(error), error);
+            const e = new DatabaseRequestError("Database query error.", "501");
+            throw e;
+        });
         if (userRequested.length == 0) {
-            logging.error(NAMESPACE, "Uuid given cannot be found!", new Error("Uuid does not exist in database."));
-            return { 
-                statusCode: 404,
-                error: new Error("User does not exist.")
-            };
+            logging.error(NAMESPACE, "Uuid given cannot be found! Users array requested: \n", userRequested);
+            const e = new DatabaseRequestError("User(s) does not exist.", "404");
+            throw e;
         }
         const accessToken = signJWT(userRequested[0], "accessPrivateKey");
         logging.info(NAMESPACE, "---------END OF ACCESS TOKEN REFRESH PROCESS---------");
@@ -40,9 +47,11 @@ const refreshAccessToken: eventHandler = async (event) => {
             }        
         };
     } catch (error) {
-        logging.error(NAMESPACE, getErrorMessage(error), error)
+        logging.error(NAMESPACE, getErrorMessage(error), error);
+        const code = parseInt(getErrorName(error));
+        const errorCode = (code === null) ? 500 : code;         
         return {
-            statusCode: 500,
+            statusCode: errorCode,
             error: new Error("Refreshing accessToken failed.")
         };
     }
@@ -64,15 +73,23 @@ const validateToken: eventHandler = async (event) => {
 const register: eventHandler = async (event) => {
     const { name, email, password } = event.payload as RegisterReq;
     try {
+        if (!email || !password || !name) {
+            const e = new DatabaseRequestError("Missing name, email, password parameter(s)", "401");
+            throw e;
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         logging.info(NAMESPACE,"Password hashed!");
         await db.insert(users).values({ 
             name: name,
             email: email,
             password: hashedPassword
+        }).catch((error) => {
+            logging.error(NAMESPACE, getErrorMessage(error), error);
+            const e = new DatabaseRequestError("Database query error.", "501");
+            throw e;
         });
         logging.info(NAMESPACE, "Data has been sent to database.");
-        logging.info(NAMESPACE, "Data displayed.");   
         logging.info(NAMESPACE, "---------END OF REGISTRATION PROCESS---------")     
         return {
             statusCode: 201,
@@ -82,10 +99,12 @@ const register: eventHandler = async (event) => {
             }
         };
     } catch (error) {
-        logging.error(NAMESPACE, getErrorMessage(error) , error);
+        logging.error(NAMESPACE, getErrorMessage(error), error);
+        const code = parseInt(getErrorName(error));
+        const errorCode = (code === null) ? 400 : code;         
         return {
-            statusCode: 403,
-            error: new Error("User already exists.")
+            statusCode: errorCode,
+            error: new Error("Register new user request failed.")
         };
     }
 };
@@ -94,39 +113,41 @@ const loginUser: eventHandler = async (event) => {
     const {email} = event.payload as LoginReq;
     const {password} = event.payload as LoginReq;
     try {
+        if (!email || !password) {
+            const e = new DatabaseRequestError("Missing email or password parameter(s)", "401");
+            throw e;
+        }
         logging.info(NAMESPACE, "Login info received.");
         const usersInDB = await db.select().from(users).where(eq(users.email,email));
-        logging.info(NAMESPACE, "Users info retrieved from database.", usersInDB);
+        logging.info(NAMESPACE, "Users info retrieved from database. User Retrieved data: \n", usersInDB);
         if (usersInDB.length == 0) {
-            return {
-                statusCode: 401,
-                error: new Error("Email is incorrect or not registered.")
-            };
+            const e = new DatabaseRequestError("Email is incorrect or not registered. Unable to retrieve user.", "401");
+            throw e;
         }
 
         const result = bcrypt.compareSync(password, usersInDB[0].password);
-        if (result) {
-            const refreshToken = signJWT(usersInDB[0], "refreshPrivateKey");
-            const accessToken = signJWT(usersInDB[0], "accessPrivateKey");
-            return {
-                statusCode: 200,
-                data: {
-                    message: "Both tokens authentication successful. Login Success!",
-                    accessToken: accessToken,
-                    refreshToken: refreshToken,
-                    user: usersInDB[0]
-                } 
-            };
-        } else {
-                return {
-                    statusCode: 401,
-                    error: new Error("Incorrect password")
-                };
-            }
-    } catch (error) {
+        if (!result) {
+            const e = new AuthenticationError("User(s) does not exist.", "404");
+            throw e;
+        }
+        const refreshToken = signJWT(usersInDB[0], "refreshPrivateKey");
+        const accessToken = signJWT(usersInDB[0], "accessPrivateKey");
         return {
-            statusCode: 500,
-            error: error 
+            statusCode: 200,
+            data: {
+                message: "Both tokens authentication successful. Login Success!",
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+                user: usersInDB[0]
+            } 
+        };
+    } catch (error) {
+        logging.error(NAMESPACE, getErrorMessage(error), error);
+        const code = parseInt(getErrorName(error));
+        const errorCode = (code === null || code === undefined) ? 500 : code; 
+        return {
+            statusCode: errorCode,
+            error: new Error("Login request failed.") 
         };
     }
 };

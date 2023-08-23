@@ -19,9 +19,10 @@ type handlerAuthReturnObject = {
 const NAMESPACE = "routerEnclose";
 
 export const routerEnclose: routerEncloseFunction = (fn, formatExchange) => (req, res) => {
+    logging.info(NAMESPACE, "ROUTER function hit!")
     fn(formatExchange ? formatExchange(req) : req).then(
         (returnObject: handlerReturnObject) => {
-            logging.info(NAMESPACE, "testing type of statusCode: ", typeof(returnObject))
+            logging.info(NAMESPACE, "testing type of statusCode in ROUTER: ", typeof(returnObject))
             if (returnObject.statusCode >= 200 && returnObject.statusCode < 300) {
                 return res.status(returnObject.statusCode).json(returnObject.data);
             } else {
@@ -32,8 +33,10 @@ export const routerEnclose: routerEncloseFunction = (fn, formatExchange) => (req
 };
 
 export const routerEncloseAuthentication: routerEncloseFunction = (fn, formatExchange) => (req, res, next) => {
+    logging.info(NAMESPACE, "AUTH function hit!")
     fn(formatExchange ? formatExchange(req) : req).then(
         (returnObject: handlerAuthReturnObject) => {
+            logging.info(NAMESPACE, "testing type of statusCode in AUTH: ", typeof(returnObject))
             if (returnObject.statusCode >= 200 && returnObject.statusCode < 300) {
                 req.body.data = returnObject.data;
                 return next();

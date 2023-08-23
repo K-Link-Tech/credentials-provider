@@ -37,7 +37,7 @@ router.get(
             source: "express",
             payload: {
                 accessToken: accessToken,
-                refreshToken: refreshToken,
+                refreshToken: refreshToken
             }
         }
     }), 
