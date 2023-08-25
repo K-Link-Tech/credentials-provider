@@ -3,9 +3,9 @@ class DatabaseRequestError extends Error {
     constructor ( msg: string, name?: string) {
         super(msg);
         if (name) {
-            super.name = name;
+            this.name = name;
         } else {
-            super.name = "500";
+            this.name = "500";
         }
     }
 }
@@ -14,9 +14,9 @@ class BadUserRequestError extends Error {
     constructor ( msg: string, name?: string) {
         super(msg);
         if (name) {
-            super.name = name;
+            this.name = name;
         } else {
-            super.name = "400";
+            this.name = "400";
         }
     }
 }
@@ -25,9 +25,9 @@ class AuthenticationError extends Error {
     constructor ( msg: string, name?: string) {
         super(msg);
         if (name) {
-            super.name = name;
+            this.name = name;
         } else {
-            super.name = "401";
+            this.name = "401";
         }
     }
 }

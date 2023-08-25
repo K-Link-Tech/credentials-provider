@@ -7,3 +7,5 @@ backend/keys/access-private-key.pem
 backend/keys/refresh-private-key.pem
 backend/keys/refresh-public-key.pem
 .env*
+backend/src/modules/authentication/test/Utils.test.ts
+backend/src/modules/authentication/utils/utils.ts
