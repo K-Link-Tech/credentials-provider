@@ -1,7 +1,7 @@
 import logging from "../config/logging.config";
 import { verifyJWT } from "../utils/JWT-helpers";
-import { extractJWTReq } from "../interfaces/authRequest.interface";
-import { getErrorMessage } from "../../../../errorHandler";
+import { extractJWTReq } from "../modules/interfaces/authRequest.interface";
+import { getErrorMessage } from "../../errorHandler";
 
 const NAMESPACE = "Auth/extractJWT";
 

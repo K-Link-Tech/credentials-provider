@@ -1,12 +1,12 @@
-import db from '../config/db';
+import db from '../../config/db';
 import bcrypt from "bcrypt";
 import { eq, sql } from "drizzle-orm";
-import { signJWT } from '../utils/JWT-helpers';
-import { users } from '../schema/users.schema';
+import { signJWT } from '../../utils/JWT-helpers';
+import { users } from '../../schema/users.schema';
 import { DecodedJWTObj, LoginReq, RegisterReq } from '../interfaces/authRequest.interface';
-import logging from '../config/logging.config';
-import { getErrorMessage, getErrorName } from '../../../../errorHandler';
-import { AuthenticationError, DatabaseRequestError } from '../utils/errorTypes';
+import logging from '../../config/logging.config';
+import { getErrorMessage, getErrorName } from '../../../errorHandler';
+import { AuthenticationError, DatabaseRequestError } from '../../utils/errorTypes';
 
 const NAMESPACE = "Auth-route";
 
@@ -118,7 +118,13 @@ const loginUser: eventHandler = async (event) => {
             throw e;
         }
         logging.info(NAMESPACE, "Login info received.");
-        const usersInDB = await db.select().from(users).where(eq(users.email,email));
+        logging.debug(NAMESPACE, "Error is next");
+        const usersInDB = await db.select().from(users).where(eq(users.email,email)).catch((error) => {
+            logging.error(NAMESPACE, getErrorMessage(error), error);
+            const e = new DatabaseRequestError("Database query error.", "501");
+            throw e;
+        });
+        logging.debug(NAMESPACE, "Error is prev");
         logging.info(NAMESPACE, "Users info retrieved from database. User Retrieved data: \n", usersInDB);
         if (usersInDB.length == 0) {
             const e = new DatabaseRequestError("Email is incorrect or not registered. Unable to retrieve user.", "401");

@@ -3,8 +3,8 @@ import { resolve } from 'path';
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from 'cookie-parser';
-import userRouter from "./users-routes";
-import authRouter from "./auth-routes";
+import userRouter from "./modules/routes/users-routes";
+import authRouter from "./modules/routes/auth-routes";
 
 dotenv.config({path: resolve(__dirname, "../../../.env")});
 

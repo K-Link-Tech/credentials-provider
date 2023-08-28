@@ -1,11 +1,11 @@
-import db from '../config/db';
+import db from '../../config/db';
 import bcrypt from "bcrypt";
 import { eq, sql } from "drizzle-orm";
-import { getErrorMessage, getErrorName } from '../../../../errorHandler';
-import { users } from '../schema/users.schema';
-import logging from '../config/logging.config';
+import { getErrorMessage, getErrorName } from '../../../errorHandler';
+import { users } from '../../schema/users.schema';
+import logging from '../../config/logging.config';
 import { ReqParams, UpdateParams } from '../interfaces/usersRequest.interface';
-import { BadUserRequestError, DatabaseRequestError } from '../utils/errorTypes';
+import { BadUserRequestError, DatabaseRequestError } from '../../utils/errorTypes';
 
 const NAMESPACE = "User-routes";
 

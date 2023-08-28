@@ -5,8 +5,8 @@
   "main": "index.ts",
   "scripts": {
     "test": "jest",
-    "dev": "nodemon ./src/modules/authentication/routes/index.ts",
-    "start": "node ./src/modules/authentication/routes/index.ts",
+    "dev": "nodemon ./src/index.ts",
+    "start": "node ./src/index.ts",
     "db:generate": "drizzle-kit generate:pg --config=./src/modules/authentication/config/drizzle.config.ts",
     "db:delete": "drizzle-kit drop --config=./src/modules/authentication/config/drizzle.config.ts",
     "db:push": "drizzle-kit push:pg --config=./src/modules/authentication/config/drizzle.config.ts",

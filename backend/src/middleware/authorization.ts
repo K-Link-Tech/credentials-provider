@@ -1,4 +1,4 @@
-import { getErrorMessage } from "../../../../errorHandler";
+import { getErrorMessage } from "../../errorHandler";
 import dotenv from "dotenv";
 import { resolve } from "path";
 import { verifyJWT } from "../utils/JWT-helpers";

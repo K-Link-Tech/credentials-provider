@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken';
 import dotenv from "dotenv";
 import { resolve } from 'path';
-import { getErrorMessage } from '../../../../errorHandler';
+import { getErrorMessage } from '../../errorHandler';
 import logging from '../config/logging.config';
-import User from '../interfaces/user.interface';
+import User from '../modules/interfaces/user.interface';
 import config from '../config/config';
 import { AuthenticationError } from './errorTypes';
 

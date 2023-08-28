@@ -1,7 +1,7 @@
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
-import config from "../../src/modules/authentication/config/config";
+import config from "../../src/config/config";
 
 const doMigrate = async () => {
     try {

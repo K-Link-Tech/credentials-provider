@@ -1,7 +1,7 @@
 import { Request, Router } from 'express';
 import handler from '../handlers/auth';
-import { routerEnclose, routerEncloseAuthentication } from '../utils/routerEnclose';
-import { extractBothJWT, extractRefreshJWT } from '../middleware/extractJWT';
+import { routerEnclose, routerEncloseAuthentication } from '../../utils/routerEnclose';
+import { extractBothJWT, extractRefreshJWT } from '../../middleware/extractJWT';
 import { DecodedJWTObj, LoginReq, RegisterReq } from '../interfaces/authRequest.interface';
 
 const router = Router();

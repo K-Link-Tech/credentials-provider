@@ -1,3 +1,4 @@
+import { users } from "./users.schema";
 import { serial, text, timestamp, pgTable, uuid, json } from "drizzle-orm/pg-core";
 
 export const logs = pgTable("logs", {
