@@ -1,0 +1,112 @@
+#!/usr/bin/env node
+const fs = require('node:fs');
+const path = require('node:path');
+const PackageJson = require('../package.json');
+const readline = require('readline').createInterface({
+	input: process.stdin,
+	output: process.stdout,
+});
+
+function getVersion(versionStr = '') {
+	const [major, minor, patch] = versionStr
+		.split('.')
+		.map((val) => (val >= 0 ? parseInt(val) : 0));
+	return { major, minor, patch };
+}
+
+function calcNewVersion(
+	/**
+	 * @type {{
+	 * 	versionType: 'major' | 'minor' | 'patch',
+	 * 	currentVersion: {major: number, minor: number, patch: number}
+	 * }}
+	 */
+	{ versionType, currentVersion },
+) {
+	let major = currentVersion.major,
+		minor = currentVersion.minor,
+		patch = currentVersion.patch;
+
+	if (versionType === 'major') {
+		major += 1;
+		minor = 0;
+		patch = 0;
+	}
+	if (versionType === 'minor') {
+		minor += 1;
+		patch = 0;
+	}
+	if (versionType === 'patch') patch += 1;
+
+	return {
+		version: { major, minor, patch },
+		str: `${major}.${minor}.${patch}`,
+	};
+}
+
+function getScriptArgs() {
+	const keys = ['versionType'];
+	const args = process.argv.slice(2);
+
+	/** @type {Map<string, string>} */
+	const keyMap = new Map();
+
+	for (let i = 0; i < args.length; i++) {
+		keyMap.set(keys[i], args[i]);
+	}
+
+	if (!['major', 'minor', 'patch'].includes(keyMap.get('versionType'))) {
+		console.error(
+			'[ARG_ERROR 🛑]: versionType only accept `major`, `minor` or `patch`.',
+		);
+		process.exit(1);
+	}
+
+	/** @type {{ versionType: 'major' | 'minor' | 'patch'}} */
+	const map = Object.fromEntries(keyMap.entries());
+	return map;
+}
+
+function main() {
+	const currVersionStr = PackageJson.version;
+	const currentVersion = getVersion(currVersionStr);
+	const { versionType } = getScriptArgs();
+	const newVersion = calcNewVersion({ versionType, currentVersion });
+
+	readline.question(
+		`Do you want to change new version? Y(confirm) / N(cancel)
+Current: ${currVersionStr}
+New: ${newVersion.str}
+> `,
+		(confirm) => {
+			if (confirm.toLowerCase() !== 'y') {
+				readline.close();
+				process.exit(0);
+			}
+
+			const newPkgJson = JSON.stringify(
+				{
+					...PackageJson,
+					version: newVersion.str,
+				},
+				null,
+				4,
+			);
+
+			console.log('Writing new version... 🚀');
+			const filePath = path.resolve(__dirname, '../package.json');
+			fs.writeFileSync(filePath, newPkgJson);
+			console.log('Finished writing new version! 🎉');
+
+			readline.close();
+		},
+	);
+}
+
+try {
+	main();
+} catch (e) {
+	console.error('[EXECUTION_ERROR 🛑]: Error while executing the process.');
+	console.error(e);
+	process.exit(1);
+}
