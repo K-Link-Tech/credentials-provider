@@ -25,10 +25,6 @@ const getUsers: eventHandler = async (event) => {
   const { id, authData } = event.payload as ReqParams;
   // if id == null means the person is trying to get all users
   try {
-    if (!id) {
-      const e = new DatabaseRequestError('Missing id parameter', '401');
-      throw e;
-    }
 
     logging.info(
       NAMESPACE,
@@ -226,7 +222,7 @@ const updateUser: eventHandler = async (event) => {
       .from(users)
       .where(eq(users.id, id))
       .catch((error) => {
-        logging.error(NAMESPACE, 'Database query failed to retrieve user!');
+        logging.error(NAMESPACE, getErrorMessage(error), error);
         const e = new DatabaseRequestError('Get request query error!', '501');
         throw e;
       });
