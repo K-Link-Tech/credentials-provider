@@ -7,9 +7,9 @@
     "test": "jest",
     "dev": "nodemon ./src/index.ts",
     "start": "node ./src/index.ts",
-    "db:generate": "drizzle-kit generate:pg --config=./src/modules/authentication/config/drizzle.config.ts",
-    "db:delete": "drizzle-kit drop --config=./src/modules/authentication/config/drizzle.config.ts",
-    "db:push": "drizzle-kit push:pg --config=./src/modules/authentication/config/drizzle.config.ts",
+    "db:generate": "drizzle-kit generate:pg --config=./src/config/drizzle.config.ts",
+    "db:delete": "drizzle-kit drop --config=./src/config/drizzle.config.ts",
+    "db:push": "drizzle-kit push:pg --config=./src/config/drizzle.config.ts",
     "db:deploy": "ts-node ./drizzle/migrations/migrate.ts"
   },
   "repository": {
