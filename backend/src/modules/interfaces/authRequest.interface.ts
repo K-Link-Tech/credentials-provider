@@ -1,9 +1,8 @@
-import { uuid } from "drizzle-orm/pg-core";
-
 interface LoginReq {
     email: string;
     password: string;
 }
+
 
 interface RegisterReq {
     name: string;
@@ -35,5 +34,5 @@ export {
     RegisterReq,
     RefreshAccessReq,
     extractJWTReq,
-    DecodedJWTObj
+    DecodedJWTObj,
 }

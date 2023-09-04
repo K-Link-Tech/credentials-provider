@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { eq, sql } from 'drizzle-orm';
 import { signJWT } from '../../utils/JWT-helpers';
 import { users } from '../../schema/users.schema';
+import { logs } from '../../schema/logs.schema';
 import {
   DecodedJWTObj,
   LoginReq,
@@ -14,6 +15,7 @@ import {
   AuthenticationError,
   DatabaseRequestError,
 } from '../../utils/errorTypes';
+import { json } from 'drizzle-orm/pg-core';
 
 const NAMESPACE = 'Auth-route';
 
@@ -136,6 +138,7 @@ const register: eventHandler = async (event) => {
 const loginUser: eventHandler = async (event) => {
   const { email } = event.payload as LoginReq;
   const { password } = event.payload as LoginReq;
+  
   try {
     if (!email || !password) {
       const e = new DatabaseRequestError(
@@ -145,19 +148,17 @@ const loginUser: eventHandler = async (event) => {
       throw e;
     }
     logging.info(NAMESPACE, 'Login info received.');
-    logging.debug(NAMESPACE, 'Error is next');
     const usersInDB = await db
       .select()
       .from(users)
       .where(eq(users.email, email))
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);
-        const e = new DatabaseRequestError('Database query error.', '501');
+        const e = new DatabaseRequestError('Users Database query error.', '501');
         throw e;
       });
 
     console.log(usersInDB);
-    logging.debug(NAMESPACE, 'Error is prev');
     logging.info(
       NAMESPACE,
       'Users info retrieved from database. User Retrieved data: \n',
@@ -178,6 +179,25 @@ const loginUser: eventHandler = async (event) => {
     }
     const refreshToken = signJWT(usersInDB[0], 'refreshPrivateKey');
     const accessToken = signJWT(usersInDB[0], 'accessPrivateKey');
+
+    //TODO: log table here create, insert new record into log table.
+    // write success if success and fail write error.
+    await db
+    .insert(logs)
+    .values({
+      userId: usersInDB[0].id,
+      taskDetail: json('user_details').default({
+        user_data: usersInDB[0],
+        access_data: accessToken,
+        refresh_data: refreshToken
+      }),
+    })
+    .catch((error) => {
+      logging.error(NAMESPACE, getErrorMessage(error), error);
+      const e = new DatabaseRequestError('Logs Database query error.', '501');
+      throw e;
+    });
+
     return {
       statusCode: 200,
       data: {
