@@ -103,20 +103,36 @@ const register: eventHandler = async (event) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     logging.info(NAMESPACE, 'Password hashed!');
-    await db
+    const usersInDB = await db
       .insert(users)
       .values({
         name: name,
         email: email,
         password: hashedPassword,
-      })
+      }).returning()
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);
         const e = new DatabaseRequestError('Database query error.', '501');
         throw e;
       });
+
+    await db
+      .insert(logs)
+      .values({
+        userId: usersInDB[0].id,
+        taskDetail: json('user_details').default({
+          user_data: `New user created: ${usersInDB[0].name}`
+        }),
+      })
+      .catch((error) => {
+        logging.error(NAMESPACE, getErrorMessage(error), error);
+        const e = new DatabaseRequestError('Logs Database query error.', '501');
+        throw e;
+      });
+
     logging.info(NAMESPACE, 'Data has been sent to database.');
     logging.info(NAMESPACE, '---------END OF REGISTRATION PROCESS---------');
+
     return {
       statusCode: 201,
       data: {
@@ -187,9 +203,7 @@ const loginUser: eventHandler = async (event) => {
     .values({
       userId: usersInDB[0].id,
       taskDetail: json('user_details').default({
-        user_data: usersInDB[0],
-        access_data: accessToken,
-        refresh_data: refreshToken
+        user_data: usersInDB[0].name + " logged in."
       }),
     })
     .catch((error) => {
