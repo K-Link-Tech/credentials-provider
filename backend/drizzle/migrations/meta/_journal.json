@@ -50,6 +50,20 @@
       "when": 1693820268365,
       "tag": "0006_tired_squirrel_girl",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1693994497460,
+      "tag": "0007_watery_sentry",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1693994837899,
+      "tag": "0008_mushy_agent_brand",
+      "breakpoints": true
     }
   ]
 }
