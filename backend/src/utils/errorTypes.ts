@@ -1,4 +1,7 @@
 
+/**
+ * Class that represents a custom error with regards to Database request failures.
+ */
 class DatabaseRequestError extends Error {
     constructor ( msg: string, name?: string) {
         super(msg);
@@ -10,6 +13,9 @@ class DatabaseRequestError extends Error {
     }
 }
 
+/**
+ * Class that represents a custom error with regards to User request failures.
+ */
 class BadUserRequestError extends Error {
     constructor ( msg: string, name?: string) {
         super(msg);
@@ -21,6 +27,9 @@ class BadUserRequestError extends Error {
     }
 }
 
+/**
+ * Class that represents a custom error with regards to Authentication failures.
+ */
 class AuthenticationError extends Error {
     constructor ( msg: string, name?: string) {
         super(msg);

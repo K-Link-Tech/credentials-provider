@@ -12,7 +12,10 @@ export const env_key_values = pgTable('env_key_values', {
   encryption_method: encryptionEnum('encryptionAlgo').notNull(),
   environment_id: uuid('environment_id')
     .notNull()
-    .references(() => environments.id),
+    .references(() => environments.id, {
+      onDelete: 'cascade',
+      onUpdate: 'cascade'
+    }),
   createdAt: time('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),

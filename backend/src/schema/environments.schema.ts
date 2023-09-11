@@ -8,11 +8,12 @@ id: uuid('id').defaultRandom().primaryKey(),
   name: text('name')
     .notNull()
     .unique(),
-  code: text('code').notNull(),
-  key: text('key').notNull(),
   project_id: uuid('project_id')
     .notNull()
-    .references(() => projects.id),
+    .references(() => projects.id, { 
+      onDelete: 'cascade', 
+      onUpdate: 'cascade' 
+    }),
   createdAt: time('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),

@@ -95,7 +95,7 @@ const register: eventHandler = async (event) => {
   try {
     if (!email || !password || !name) {
       const e = new DatabaseRequestError(
-        'Missing name, email, password parameter(s)',
+        'Missing name, email, password parameter(s).',
         '401'
       );
       throw e;
@@ -116,7 +116,17 @@ const register: eventHandler = async (event) => {
         throw e;
       });
 
-    await db
+    if (usersInDB.length.valueOf() === 0) {
+      logging.error(
+        NAMESPACE,
+        'Database query failed to retrieve user(s)! User array retrieved: ',
+        usersInDB
+      );
+      const e = new DatabaseRequestError('User has not been added to database.', '501');
+      throw e;
+    }
+
+    const registerLog = await db
       .insert(logs)
       .values({
         userId: usersInDB[0].id,
@@ -130,6 +140,16 @@ const register: eventHandler = async (event) => {
         throw e;
       });
 
+      if (registerLog.length.valueOf() === 0) {
+        logging.error(
+          NAMESPACE,
+          'Database query failed to retrieve register log! Log array retrieved: ',
+          registerLog
+        );
+        const e = new DatabaseRequestError('Register log has not been added to database.', '501');
+        throw e;
+      }
+
     logging.info(NAMESPACE, 'Data has been sent to database.');
     logging.info(NAMESPACE, '---------END OF REGISTRATION PROCESS---------');
 
@@ -137,7 +157,7 @@ const register: eventHandler = async (event) => {
       statusCode: 201,
       data: {
         message: 'The following user has been registered:',
-        users: event.payload,
+        user: event.payload,
       },
     };
   } catch (error) {
@@ -158,7 +178,7 @@ const loginUser: eventHandler = async (event) => {
   try {
     if (!email || !password) {
       const e = new DatabaseRequestError(
-        'Missing email or password parameter(s)',
+        'Missing email or password parameter(s).',
         '401'
       );
       throw e;
@@ -180,6 +200,7 @@ const loginUser: eventHandler = async (event) => {
       'Users info retrieved from database. User Retrieved data: \n',
       usersInDB
     );
+
     if (usersInDB.length == 0) {
       const e = new DatabaseRequestError(
         'Email is incorrect or not registered. Unable to retrieve user.',
@@ -190,27 +211,36 @@ const loginUser: eventHandler = async (event) => {
 
     const result = bcrypt.compareSync(password, usersInDB[0].password);
     if (!result) {
-      const e = new AuthenticationError('User(s) does not exist.', '404');
+      const e = new AuthenticationError('Password is wrong.', '401');
       throw e;
     }
     const refreshToken = signJWT(usersInDB[0], 'refreshPrivateKey');
     const accessToken = signJWT(usersInDB[0], 'accessPrivateKey');
 
-    //TODO: log table here create, insert new record into log table.
-    // write success if success and fail write error.
-    await db
-    .insert(logs)
-    .values({
-      userId: usersInDB[0].id,
-      taskDetail: json('user_details').default({
-        user_data: usersInDB[0].name + " logged in."
-      }),
-    })
-    .catch((error) => {
-      logging.error(NAMESPACE, getErrorMessage(error), error);
-      const e = new DatabaseRequestError('Logs Database query error.', '501');
+    const loginLog = await db
+      .insert(logs)
+      .values({
+        userId: usersInDB[0].id,
+        taskDetail: json('user_details').default({
+          user_data: usersInDB[0].name + " logged in."
+        }),
+      })
+      .returning()
+      .catch((error) => {
+        logging.error(NAMESPACE, getErrorMessage(error), error);
+        const e = new DatabaseRequestError('Logs Database query error.', '501');
+        throw e;
+      });
+    
+      if (loginLog.length.valueOf() === 0) {
+      logging.error(
+        NAMESPACE,
+        'Database query failed to retrieve login log! Log array retrieved: ',
+        loginLog
+      );
+      const e = new DatabaseRequestError('Login log has not been added to database.', '501');
       throw e;
-    });
+    }
 
     return {
       statusCode: 200,

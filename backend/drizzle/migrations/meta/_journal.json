@@ -64,6 +64,20 @@
       "when": 1693994837899,
       "tag": "0008_mushy_agent_brand",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1694418671008,
+      "tag": "0009_lazy_vision",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1694426245082,
+      "tag": "0010_mighty_lady_mastermind",
+      "breakpoints": true
     }
   ]
 }

@@ -26,11 +26,6 @@ const getUsers: eventHandler = async (event) => {
   // if id == null means the person is trying to get all users
   try {
 
-    logging.info(
-      NAMESPACE,
-      'Fetching data from database. Type of id:',
-      typeof id
-    );
     const usersRequested =
       id == null
         ? await db
@@ -63,7 +58,7 @@ const getUsers: eventHandler = async (event) => {
         'Database query failed to retrieve user(s)! User array retrieved: ',
         usersRequested
       );
-      const e = new DatabaseRequestError('User(s) does not exist.', '404');
+      const e = new DatabaseRequestError('User(s) do not exist.', '404');
       throw e;
     }
     logging.info(NAMESPACE, '---------END OF GET USERS PROCESS---------');
@@ -106,9 +101,6 @@ const deleteUser: eventHandler = async (event) => {
         const e = new DatabaseRequestError('Database query error.', '501');
         throw e;
       });
-    const number: number = deletedUser.length.valueOf();
-    logging.debug(NAMESPACE, 'length of array');
-    logging.debug(NAMESPACE, 'length of array', number);
 
     if (deletedUser.length.valueOf() === 0) {
       logging.error(
@@ -143,7 +135,7 @@ const deleteUser: eventHandler = async (event) => {
 const deleteAllUsers: eventHandler = async (event) => {
   const { authData } = event.payload as ReqParams;
   try {
-    logging.info(NAMESPACE, 'Deleting all users from database.');
+    logging.info(NAMESPACE, 'Deleting ALL users from database.');
     const usersDeleted = await db
       .delete(users)
       .returning()
@@ -191,9 +183,9 @@ const updateUser: eventHandler = async (event) => {
   const { name, email, password, authData } = body as UpdateParams;
 
   try {
-    if (!id || !email || !password || !name) {
+    if (!id ) {
       const e = new DatabaseRequestError(
-        'Missing id, email, password, name parameter (s)',
+        'Missing id parameter(s)',
         '401'
       );
       throw e;
@@ -201,7 +193,7 @@ const updateUser: eventHandler = async (event) => {
 
     if (
       name === undefined &&
-      password === undefined &&
+      email === undefined &&
       password === undefined
     ) {
       logging.error(

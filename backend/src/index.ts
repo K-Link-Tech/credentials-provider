@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import userRouter from './modules/routes/users-routes';
 import authRouter from './modules/routes/auth-routes';
+import projRouter from './modules/routes/project-routes';
 import path from 'path';
 
 dotenv.config({
@@ -20,8 +21,11 @@ app.use(cors(corsOption));
 app.use(json());
 app.use(cookieParser());
 
+
 app.use('/api/users', userRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/proj', projRouter);
+
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Credential Provider Landing Page');

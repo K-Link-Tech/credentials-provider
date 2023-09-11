@@ -31,8 +31,8 @@ router.post(
 router.get(
     '/validate', 
     routerEncloseAuthentication(extractBothJWT, ( req: Request ) => {
-        const accessToken = req.headers.authorization?.split(' ')[1];
-        const refreshToken = req.headers.authorization?.split(' ')[2];
+        const accessToken: string | undefined = req.headers.authorization?.split(' ')[1];
+        const refreshToken: string | undefined = req.headers.authorization?.split(' ')[2];
         return {
             source: "express",
             payload: {

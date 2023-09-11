@@ -5,7 +5,10 @@ export const logs = pgTable('logs', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id')
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, {
+      onDelete: 'cascade', 
+      onUpdate: 'cascade'
+    }),
   taskDetail: json('task_detail').notNull(),
   createdAt: time('created_at', { withTimezone: true })
     .defaultNow()

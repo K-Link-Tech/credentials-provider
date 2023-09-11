@@ -9,8 +9,18 @@ import { AuthenticationError } from './errorTypes';
 
 dotenv.config({ path: resolve(__dirname, '../../../../.env') });
 
+/**
+ * Variable to store namespace for logging.
+ */
 const NAMESPACE = 'Auth/JWT-helpers';
 
+/**
+ * Function helps to sign the JWT signature for a specific user and returns the signed token.
+ * 
+ * @param user A user object containing user data.
+ * @param tokenType A string specifying the type of token to be signed. (Access or Refresh tokens)
+ * @returns Either a string containing the signed token or an error should the signing fail.
+ */
 const signJWT = (user: User, tokenType: string): string | Error => {
   logging.info(
     NAMESPACE,
@@ -50,6 +60,13 @@ const signJWT = (user: User, tokenType: string): string | Error => {
   }
 };
 
+/**
+ * The function verifies if a token is valid or not.
+ * 
+ * @param token A string containing the token that needs verification.
+ * @param tokenType A string specifying the type of token to be verified. (Access or Refresh token)
+ * @returns A decoded jwt payload containing the information about verification results.
+ */
 const verifyJWT = <T>(token: string, tokenType: string): T | void => {
   logging.info(NAMESPACE, `Attempting to verify ${tokenType}...`);
   const tokenUsed =
