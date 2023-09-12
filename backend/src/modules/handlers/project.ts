@@ -15,7 +15,6 @@ import {
 import { projects } from '../../schema/projects.schema';
 import { environments } from '../../schema/environments.schema';
 import { logs } from '../../schema/logs.schema';
-import { json } from 'drizzle-orm/pg-core';
 import { eq, sql } from 'drizzle-orm';
 
 const NAMESPACE = 'Project-route';
@@ -112,13 +111,14 @@ const createNewProject: eventHandler = async (event) => {
     }
 
     // inserting new create projects log into logs DB.
+    const jsonContent = {
+      user_data: data.name + " has created project: " + projectsInDB[0].name + "."
+    };
     const loginLog = await db
       .insert(logs)
       .values({
         userId: data.id,
-        taskDetail: json('project_details').default({
-          user_data: data.name + " has created project: " + projectsInDB[0].name
-        }),
+        taskDetail: sql`${jsonContent}::json`
       })
       .returning()
       .catch((error) => {
@@ -249,13 +249,16 @@ const deleteProject: eventHandler = async (event) => {
       }
 
       // inserting new delete project into logs DB.
+      const jsonContent = {
+        user_data: 
+        data.name + " has deleted project: " + deletedProject[0].name 
+        + " and all related environments."
+      };
       const loginLog = await db
       .insert(logs)
       .values({
         userId: data.id,
-        taskDetail: json('project_details').default({
-          user_data: data.name + " has deleted project: " + deletedProject[0].name + " and all related environments."
-        }),
+        taskDetail: sql`${jsonContent}::json`
       })
       .returning()
       .catch((error) => {
@@ -321,19 +324,22 @@ const deleteAllProjects: eventHandler = async (event) => {
         throw e;
       }
     
-    let stringOfProjectsDeleted = " ";
-    for (let i = 0; i < deletedProjects.length; i++) {
-      stringOfProjectsDeleted = stringOfProjectsDeleted.concat(deletedProjects[i].name + ", ");
-    };
+    // let stringOfProjectsDeleted = " ";
+    // for (let i = 0; i < deletedProjects.length; i++) {
+    //   stringOfProjectsDeleted = stringOfProjectsDeleted.concat(deletedProjects[i].name + ", ");
+    // };
 
     // inserting new delete project into logs DB.
+    const jsonContent = {
+      user_data: data.name + " has deleted all projects below and all related environments.",
+      deletedProjects: deletedProjects
+    };
+
     const loginLog = await db
     .insert(logs)
     .values({
       userId: data.id,
-      taskDetail: json('project_details').default({
-        user_data: data.name + " has deleted projects: " + stringOfProjectsDeleted + "and all related environments."
-      }),
+      taskDetail: sql`${jsonContent}::json`,
     })
     .returning()
     .catch((error) => {
@@ -466,18 +472,21 @@ const updateProject: eventHandler = async (event) => {
       throw e;;
     }
 
-    logging.debug(NAMESPACE, "Printing data: ", data);
-    logging.debug(NAMESPACE, "Printing data.id: ", data.id);
+    // logging.debug(NAMESPACE, "Printing data: ", data);
+    // logging.debug(NAMESPACE, "Printing data.id: ", data.id);
+    
     // inserting update project into logs DB.
+    const jsonContent = {
+      user_data: data.name + " has updated project: " + originalProject[0].name + ".",
+      originalProject: originalProject[0],
+      updatedProject: updatedProject[0]
+    };
+
     const loginLog = await db
     .insert(logs)
     .values({
       userId: data.id,
-      taskDetail: json('project_details').default({
-        user_data: data.name + " has updated project: " + originalProject[0].name + ".",
-        originalProject: originalProject,
-        updatedProject: updatedProject
-      }),
+      taskDetail: sql`${jsonContent}::json`
     })
     .returning()
     .catch((error) => {
@@ -501,8 +510,8 @@ const updateProject: eventHandler = async (event) => {
       statusCode: 202,
       data: {
         message: 'The following user has been updated in database:',
-        originalProject: originalProject,
-        updatedProject: updatedProject,
+        originalProject: originalProject[0],
+        updatedProject: updatedProject[0],
         authData: data,
       },
     };

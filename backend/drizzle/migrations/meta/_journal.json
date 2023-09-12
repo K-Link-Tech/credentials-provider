@@ -5,78 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1689935015795,
-      "tag": "0000_wooden_shiva",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1690171164998,
-      "tag": "0001_woozy_hercules",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1690454873512,
-      "tag": "0002_pink_smiling_tiger",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1693214234706,
-      "tag": "0003_glossy_vin_gonzales",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1693215910330,
-      "tag": "0004_gigantic_lizard",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1693810273196,
-      "tag": "0005_flippant_kat_farrell",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1693820268365,
-      "tag": "0006_tired_squirrel_girl",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1693994497460,
-      "tag": "0007_watery_sentry",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "5",
-      "when": 1693994837899,
-      "tag": "0008_mushy_agent_brand",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "5",
-      "when": 1694418671008,
-      "tag": "0009_lazy_vision",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "5",
-      "when": 1694426245082,
-      "tag": "0010_mighty_lady_mastermind",
+      "when": 1694513427765,
+      "tag": "0000_lying_angel",
       "breakpoints": true
     }
   ]
