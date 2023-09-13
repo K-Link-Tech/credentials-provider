@@ -452,6 +452,8 @@ const updateProject: eventHandler = async (event) => {
             );
           throw e;
         });
+      // This loop updates each of the environments that contains the
+      // old project name to a new project name by using regEx and string.replace()
       for (let i = 0; i < oldEnvironmentsInDB.length; i++) {
         const regExToUpdate = new RegExp(originalProject[0].name, 'gi');
         const newName = oldEnvironmentsInDB[i].name.replace(regExToUpdate, name);
