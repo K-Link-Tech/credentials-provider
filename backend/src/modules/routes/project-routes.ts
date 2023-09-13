@@ -1,6 +1,9 @@
 import { Request, Router } from 'express';
 import handler from '../handlers/project';
-import { routerEnclose, routerEncloseAuthentication } from '../../utils/routerEnclose';
+import { 
+  routerEnclose, 
+  routerEncloseAuthentication 
+} from '../../utils/routerEnclose';
 import authenticateToken from '../../middleware/authorization';
 import {
   PayloadWithNameUrlData,

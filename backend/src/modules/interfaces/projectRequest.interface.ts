@@ -32,4 +32,4 @@ export {
   PayloadWithIdData,
   PayloadWithIdDataBody,
   UpdateReqBody
-}
+};

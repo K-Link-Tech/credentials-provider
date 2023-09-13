@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import userRouter from './modules/routes/users-routes';
 import authRouter from './modules/routes/auth-routes';
 import projRouter from './modules/routes/project-routes';
+import envsRouter from './modules/routes/environment-routes';
 import path from 'path';
 
 dotenv.config({
@@ -25,6 +26,8 @@ app.use(cookieParser());
 app.use('/api/users', userRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/proj', projRouter);
+app.use('/api/proj/envs', envsRouter);
+
 
 
 app.get('/', (req: Request, res: Response) => {

@@ -13,6 +13,7 @@ import logging from '../../config/logging.config';
 import { getErrorMessage, getErrorName } from '../../utils/errorHandler';
 import {
   AuthenticationError,
+  BadUserRequestError,
   DatabaseRequestError,
 } from '../../utils/errorTypes';
 import { json } from 'drizzle-orm/pg-core';
@@ -31,7 +32,7 @@ const refreshAccessToken: eventHandler = async (event) => {
   const { id } = event.payload as DecodedJWTObj;
   try {
     if (!id) {
-      const e = new DatabaseRequestError('Missing id parameter', '401');
+      const e = new BadUserRequestError('Missing id parameter', '401');
       throw e;
     }
 
@@ -94,7 +95,7 @@ const register: eventHandler = async (event) => {
   const { name, email, password } = event.payload as RegisterReq;
   try {
     if (!email || !password || !name) {
-      const e = new DatabaseRequestError(
+      const e = new BadUserRequestError(
         'Missing name, email, password parameter(s).',
         '401'
       );
@@ -185,7 +186,7 @@ const loginUser: eventHandler = async (event) => {
   
   try {
     if (!email || !password) {
-      const e = new DatabaseRequestError(
+      const e = new BadUserRequestError(
         'Missing email or password parameter(s).',
         '401'
       );

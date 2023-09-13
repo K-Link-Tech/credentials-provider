@@ -32,7 +32,7 @@ const createNewProject: eventHandler = async (event) => {
 
   try {
     if (!name || !url) {
-      const e = new DatabaseRequestError(
+      const e = new BadUserRequestError(
         'Missing name, url parameter(s).',
         '401'
       );
@@ -222,7 +222,10 @@ const deleteProject: eventHandler = async (event) => {
   
   try {
     if (!id) {
-      const e = new DatabaseRequestError('Missing id parameter', '401');
+      const e = new DatabaseRequestError(
+        'Missing id parameter', 
+        '401'
+      );
       throw e;
     }
     logging.info(NAMESPACE, 'Deleting project from database.');
@@ -432,41 +435,44 @@ const updateProject: eventHandler = async (event) => {
         });
       
       // updating names of environments related to the project
-      await db
-        .update(environments)
-        .set({ name: name + "_uat"})
+      const oldEnvironmentsInDB = await db
+        .select()
+        .from(environments)
         .where(
           and(
             eq(environments.project_id, originalProject[0].id),
-            like(environments.name, "%_uat")
+            like(environments.name, "%" + originalProject[0].name + "%")
           )
         )
         .catch((error) => {
           logging.error(NAMESPACE, getErrorMessage(error), error);
-          const e = new DatabaseRequestError(
-            'Update uat in environments database error!',
-            '501'
-          );
+            const e = new DatabaseRequestError(
+              'Database query error.',
+              '501'
+            );
           throw e;
         });
-
+      for (let i = 0; i < oldEnvironmentsInDB.length; i++) {
+        const regExToUpdate = new RegExp(originalProject[0].name, 'gi');
+        const newName = oldEnvironmentsInDB[i].name.replace(regExToUpdate, name);
         await db
         .update(environments)
-        .set( { name: name + "_prod"} )
+        .set({ name: newName })
         .where(
           and(
             eq(environments.project_id, originalProject[0].id),
-            like(environments.name, "%_prod")
+            eq(environments.name, oldEnvironmentsInDB[i].name)
           )
         )
         .catch((error) => {
           logging.error(NAMESPACE, getErrorMessage(error), error);
           const e = new DatabaseRequestError(
-            'Update prod in environments database error!',
+            'Update environments database error!',
             '501'
           );
           throw e;
         });
+      }
       updated = true;
     }
     if (url) {
