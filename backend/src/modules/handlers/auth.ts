@@ -122,17 +122,22 @@ const register: eventHandler = async (event) => {
         'Database query failed to retrieve user(s)! User array retrieved: ',
         usersInDB
       );
-      const e = new DatabaseRequestError('User has not been added to database.', '501');
+      const e = new DatabaseRequestError(
+        'User has not been added to database.', 
+        '501'
+      );
       throw e;
     }
-
+    // inserting registering new user into logs DB.
+    const jsonContent = {
+      user_data: `New user created: ${usersInDB[0].name}`,
+      user_profile: usersInDB[0]
+    }
     const registerLog = await db
       .insert(logs)
       .values({
         userId: usersInDB[0].id,
-        taskDetail: json('user_details').default({
-          user_data: `New user created: ${usersInDB[0].name}`
-        }),
+        taskDetail: sql`${jsonContent}::json`
       })
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);
@@ -146,7 +151,10 @@ const register: eventHandler = async (event) => {
           'Database query failed to retrieve register log! Log array retrieved: ',
           registerLog
         );
-        const e = new DatabaseRequestError('Register log has not been added to database.', '501');
+        const e = new DatabaseRequestError(
+          'Register log has not been added to database.', 
+          '501'
+        );
         throw e;
       }
 
@@ -217,13 +225,15 @@ const loginUser: eventHandler = async (event) => {
     const refreshToken = signJWT(usersInDB[0], 'refreshPrivateKey');
     const accessToken = signJWT(usersInDB[0], 'accessPrivateKey');
 
+    // inserting user login into logs DB.
+    const jsonContent = {
+      user_data: usersInDB[0].name + " logged in."
+    }
     const loginLog = await db
       .insert(logs)
       .values({
         userId: usersInDB[0].id,
-        taskDetail: json('user_details').default({
-          user_data: usersInDB[0].name + " logged in."
-        }),
+        taskDetail: sql`${jsonContent}::json`
       })
       .returning()
       .catch((error) => {
@@ -238,7 +248,10 @@ const loginUser: eventHandler = async (event) => {
         'Database query failed to retrieve login log! Log array retrieved: ',
         loginLog
       );
-      const e = new DatabaseRequestError('Login log has not been added to database.', '501');
+      const e = new DatabaseRequestError(
+        'Login log has not been added to database.', 
+        '501'
+      );
       throw e;
     }
 

@@ -15,7 +15,7 @@ import {
 import { projects } from '../../schema/projects.schema';
 import { environments } from '../../schema/environments.schema';
 import { logs } from '../../schema/logs.schema';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql, like } from 'drizzle-orm';
 
 const NAMESPACE = 'Project-route';
 
@@ -254,7 +254,7 @@ const deleteProject: eventHandler = async (event) => {
         data.name + " has deleted project: " + deletedProject[0].name 
         + " and all related environments."
       };
-      const loginLog = await db
+      const deleteOneLog = await db
       .insert(logs)
       .values({
         userId: data.id,
@@ -267,11 +267,11 @@ const deleteProject: eventHandler = async (event) => {
         throw e;
       });
     
-      if (loginLog.length.valueOf() === 0) {
+      if (deleteOneLog.length.valueOf() === 0) {
       logging.error(
         NAMESPACE,
         'Database query failed to retrieve delete log! Log array retrieved: ',
-        loginLog
+        deleteOneLog
       );
       const e = new DatabaseRequestError('Delete project log has not been added to database.', '501');
       throw e;
@@ -323,11 +323,6 @@ const deleteAllProjects: eventHandler = async (event) => {
         const e = new DatabaseRequestError('No projects exist.', '404');
         throw e;
       }
-    
-    // let stringOfProjectsDeleted = " ";
-    // for (let i = 0; i < deletedProjects.length; i++) {
-    //   stringOfProjectsDeleted = stringOfProjectsDeleted.concat(deletedProjects[i].name + ", ");
-    // };
 
     // inserting new delete project into logs DB.
     const jsonContent = {
@@ -335,7 +330,7 @@ const deleteAllProjects: eventHandler = async (event) => {
       deletedProjects: deletedProjects
     };
 
-    const loginLog = await db
+    const deleteAllLog = await db
     .insert(logs)
     .values({
       userId: data.id,
@@ -348,11 +343,11 @@ const deleteAllProjects: eventHandler = async (event) => {
       throw e;
     });
   
-    if (loginLog.length.valueOf() === 0) {
+    if (deleteAllLog.length.valueOf() === 0) {
     logging.error(
       NAMESPACE,
       'Database query failed to retrieve delete all log! Log array retrieved: ',
-      loginLog
+      deleteAllLog
     );
     const e = new DatabaseRequestError('Delete all projects log has not been added to database.', '501');
     throw e;
@@ -430,7 +425,44 @@ const updateProject: eventHandler = async (event) => {
         .catch((error) => {
           logging.error(NAMESPACE, getErrorMessage(error), error);
           const e = new DatabaseRequestError(
-            'Update database query error!',
+            'Update logs database query error!',
+            '501'
+          );
+          throw e;
+        });
+      
+      // updating names of environments related to the project
+      await db
+        .update(environments)
+        .set({ name: name + "_uat"})
+        .where(
+          and(
+            eq(environments.project_id, originalProject[0].id),
+            like(environments.name, "%_uat")
+          )
+        )
+        .catch((error) => {
+          logging.error(NAMESPACE, getErrorMessage(error), error);
+          const e = new DatabaseRequestError(
+            'Update uat in environments database error!',
+            '501'
+          );
+          throw e;
+        });
+
+        await db
+        .update(environments)
+        .set( { name: name + "_prod"} )
+        .where(
+          and(
+            eq(environments.project_id, originalProject[0].id),
+            like(environments.name, "%_prod")
+          )
+        )
+        .catch((error) => {
+          logging.error(NAMESPACE, getErrorMessage(error), error);
+          const e = new DatabaseRequestError(
+            'Update prod in environments database error!',
             '501'
           );
           throw e;
@@ -445,7 +477,7 @@ const updateProject: eventHandler = async (event) => {
         .catch((error) => {
           logging.error(NAMESPACE, getErrorMessage(error), error);
           const e = new DatabaseRequestError(
-            'Update database query error!',
+            'Update logs database query error!',
             '501'
           );
           throw e;
@@ -471,9 +503,6 @@ const updateProject: eventHandler = async (event) => {
       );
       throw e;;
     }
-
-    // logging.debug(NAMESPACE, "Printing data: ", data);
-    // logging.debug(NAMESPACE, "Printing data.id: ", data.id);
     
     // inserting update project into logs DB.
     const jsonContent = {
@@ -482,7 +511,7 @@ const updateProject: eventHandler = async (event) => {
       updatedProject: updatedProject[0]
     };
 
-    const loginLog = await db
+    const updateLog = await db
     .insert(logs)
     .values({
       userId: data.id,
@@ -495,11 +524,11 @@ const updateProject: eventHandler = async (event) => {
       throw e;
     });
   
-    if (loginLog.length.valueOf() === 0) {
+    if (updateLog.length.valueOf() === 0) {
     logging.error(
       NAMESPACE,
       'Database query failed to retrieve delete log! Log array retrieved: ',
-      loginLog
+      updateLog
     );
     const e = new DatabaseRequestError('Update project log has not been added to database.', '501');
     throw e;
