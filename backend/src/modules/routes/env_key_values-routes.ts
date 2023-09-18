@@ -1,16 +1,20 @@
 import { Request, Router } from 'express';
-import handler from '../handlers/environment';
+import handler from '../handlers/env_key_values';
+import authenticateToken from '../../middleware/authorization';
 import { 
   routerEnclose, 
   routerEncloseAuthentication 
 } from '../../utils/routerEnclose';
-import authenticateToken from '../../middleware/authorization';
-import { PayloadWithData, PayloadWithNameProjectIdData, UpdateEnvReqBody } from '../interfaces/environmentRequest.interface';
+import { 
+  PayloadWithData, 
+  PayloadWithValueEncryptionEnvironmentIdData, 
+  UpdateEnvKeyReqBody 
+} from '../interfaces/env_key_values.interfaceRequest';
 
 
 const router = Router();
 
-// creates a new environment
+// creates a new env_key_value
 router.post(
   '/create',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -24,8 +28,8 @@ router.post(
       }
     }
   }),
-  routerEnclose(handler.createNewEnvironment, (req: Request) => {
-    const body: PayloadWithNameProjectIdData = req.body;
+  routerEnclose(handler.createNewEnvKeyValue, (req: Request) => {
+    const body: PayloadWithValueEncryptionEnvironmentIdData = req.body;
     return {
       source: "express",
       payload: body
@@ -33,34 +37,7 @@ router.post(
   })
 );
 
-// get environment by id
-router.get(
-  '/:id',
-  routerEncloseAuthentication(authenticateToken, (req: Request) => {
-    const accessToken: string | undefined = req.headers.authorization?.split(' ')[1];
-    const refreshToken: string | undefined = req.headers.authorization?.split(' ')[2];
-    return {
-      source: "express",
-      payload: {
-        accessToken: accessToken,
-        refreshToken: refreshToken
-      }
-    }
-  }),
-  routerEnclose(handler.getEnvironments, (req: Request) => {
-    const params = req.params.id;
-    const data: PayloadWithData = req.body.data;
-    return {
-      source: "express",
-      payload: {
-        id: params,
-        data: data
-      }
-    }
-  })
-);
-
-// get all environments
+// get all env_key_values
 router.get(
   '/',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -74,7 +51,7 @@ router.get(
       }
     }
   }),
-  routerEnclose(handler.getEnvironments, (req: Request) => {
+  routerEnclose(handler.getEnvKeyValues, (req: Request) => {
     const data = req.body as PayloadWithData;
     return {
       source: "express",
@@ -83,7 +60,7 @@ router.get(
   })
 );
 
-// deletes a specific environment
+// delete one env_key_values
 router.delete(
   '/:id',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -97,7 +74,7 @@ router.delete(
       }
     }
   }),
-  routerEnclose(handler.deleteEnvironment, (req: Request) => {
+  routerEnclose(handler.deleteEnvKeyValue, (req: Request) => {
     const data: PayloadWithData = req.body.data;
     const params = req.params.id;
     return {
@@ -110,7 +87,7 @@ router.delete(
   })
 );
 
-// deletes all environments
+// deletes all env_key_values
 router.delete(
   '/',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -124,7 +101,7 @@ router.delete(
       }
     }
   }),
-  routerEnclose(handler.deleteAllEnvironments, (req: Request) => {
+  routerEnclose(handler.deleteAllEnKeyValues, (req: Request) => {
     const data: PayloadWithData = req.body.data;
     return {
       source: "express",
@@ -135,7 +112,7 @@ router.delete(
   })
 );
 
-// updates an environment 
+// updates an env_key_value 
 router.patch(
   '/:id',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -149,9 +126,9 @@ router.patch(
       }
     }
   }),
-  routerEnclose(handler.updateEnvironment, (req: Request) => {
+  routerEnclose(handler.updateEnvKeyValue, (req: Request) => {
     const data: PayloadWithData = req.body.data;
-    const body: UpdateEnvReqBody = req.body;
+    const body: UpdateEnvKeyReqBody = req.body;
     const params = req.params.id;
     return {
       source: "express",

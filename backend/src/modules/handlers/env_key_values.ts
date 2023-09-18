@@ -5,12 +5,17 @@ import {
   BadUserRequestError,
   DatabaseRequestError,
 } from '../../utils/errorTypes';
-import { environments } from '../../schema/environments.schema';
 import { logs } from '../../schema/logs.schema';
 import { and, eq, sql, like } from 'drizzle-orm';
-import { PayloadWithData, PayloadWithIdData, PayloadWithIdDataBody, PayloadWithNameProjectIdData, UpdateEnvReqBody } from '../interfaces/environmentRequest.interface';
+import { 
+  PayloadWithData, 
+  PayloadWithIdData, 
+  PayloadWithIdDataBody, 
+  PayloadWithValueEncryptionEnvironmentIdData 
+} from '../interfaces/env_key_values.interfaceRequest';
+import { env_key_values } from '../../schema/env_key_values.schema';
 
-const NAMESPACE = 'Environment-route';
+const NAMESPACE = 'Env_key_value-route';
 
 type event = {
   source: string;
@@ -19,25 +24,31 @@ type event = {
 
 type eventHandler = (event: event) => Object;
 
-const createNewEnvironment: eventHandler = async (event) => {
+const createNewEnvKeyValue: eventHandler = async (event) => {
   // data contains the jwtPayload from authentication with user information.
-  const { name, project_id, data } = event.payload as PayloadWithNameProjectIdData;
+  const { 
+    value, 
+    encryption_method,
+    environment_id, 
+    data 
+  } = event.payload as PayloadWithValueEncryptionEnvironmentIdData;
 
   try {
-    if (!name || !project_id) {
+    if (!value || !environment_id || !encryption_method) {
       const e = new BadUserRequestError(
-        'Missing name, projectId parameter(s).',
+        'Missing value, encryption_method ,environment_id parameter(s).',
         '401'
       );
       throw e;
     }
 
-    // inserting new environment into environments DB
-    const environmentsInDB = await db
-      .insert(environments)
+    // inserting new env_key_value into env_key_values DB.
+    const env_key_valuesInDB = await db
+      .insert(env_key_values)
       .values({
-        name: name,
-        project_id: project_id
+        value: value,
+        encryption_method: sql`${encryption_method}`,
+        environment_id: environment_id
       })
       .returning()
       .catch((error) => {
@@ -45,22 +56,23 @@ const createNewEnvironment: eventHandler = async (event) => {
         const e = new DatabaseRequestError('Database query error.', '501');
         throw e;
       });
-    if (environmentsInDB.length.valueOf() === 0) {
+
+    if (env_key_valuesInDB.length.valueOf() === 0) {
       logging.error(
         NAMESPACE,
-        'Database query failed to retrieve environment(s)! Environment array retrieved: ',
-        environmentsInDB
+        'Database query failed to retrieve env_key_value(s)! Env_key_value array retrieved: ',
+        env_key_valuesInDB
       );
       const e = new DatabaseRequestError(
-        'Environment has not been added to database',
+        'Env_key_value has not been added to database',
         '501'
       );
       throw e;
     }
 
-    // inserting new create environment log into logs DB.
+    // inserting new create env_key_value log into logs DB.
     const jsonContent = {
-      user_data: data.name + " has created new environment: " + environmentsInDB[0].name + "."
+      user_data: data.name + " has created new env_key_value: " + env_key_valuesInDB[0].value + "."
     };
     const createLog = await db
       .insert(logs)
@@ -77,21 +89,21 @@ const createNewEnvironment: eventHandler = async (event) => {
     if (createLog.length.valueOf() === 0) {
       logging.error(
         NAMESPACE,
-        'Database query failed to retrieve create new environment log! Log array retrieved: ',
+        'Database query failed to retrieve create new env_key_value log! Log array retrieved: ',
         createLog
       );
       const e = new DatabaseRequestError(
-        'Create new environment log has not been added to database.',
+        'Create new env_key_value log has not been added to database.',
         '501'
       );
-      throw e;
+      throw e;      
     }
 
-    logging.info(NAMESPACE, '---------END OF CREATE NEW ENVIRONMENT PROCESS---------');
+    logging.info(NAMESPACE, '---------END OF CREATE NEW ENV_KEY_VALUE PROCESS---------');
     return {
       statusCode: 201,
       data: {
-        message: 'The following environment has been created:',
+        message: 'The following env_key_value has been created:',
         environment: event.payload,
       },
     };
@@ -102,57 +114,57 @@ const createNewEnvironment: eventHandler = async (event) => {
     const errorCode = code === null ? 400 : code;
     return {
       statusCode: errorCode,
-      error: new Error('Create new environment request failed.'),
+      error: new Error('Create new env_key_value request failed.'),
     };
   }
-
 };
 
-const getEnvironments: eventHandler = async (event) => {
+const getEnvKeyValues: eventHandler = async (event) => {
   const { id, data } = event.payload as PayloadWithIdData;
 
   try {
-    // querying specific environment(s) from database.
-    const environmentRequested =
+    // querying specific env_key_values(s) from database.
+    const envKeyValueRequested = 
       id == null
-        ? await db
-          .select()
-          .from(environments)
-          .catch((error) => {
-            logging.error(NAMESPACE, getErrorMessage(error), error);
-            const e = new DatabaseRequestError(
-              'Database query error.',
-              '501'
-            );
-            throw e;
-          })
-        : await db
-          .select()
-          .from(environments)
-          .where(sql`${environments.id} = ${id}`)
-          .catch((error) => {
-            logging.error(NAMESPACE, getErrorMessage(error), error);
-            const e = new DatabaseRequestError(
-              'Database query error.',
-              '501'
-            );
-            throw e;
-          })
-    if (environmentRequested.length.valueOf() === 0) {
+          ? await db
+            .select()
+            .from(env_key_values)
+            .catch((error) => {
+              logging.error(NAMESPACE, getErrorMessage(error), error);
+              const e = new DatabaseRequestError(
+                'Database query error.',
+                '501'
+              );
+              throw e;
+            })
+          : await db
+            .select()
+            .from(env_key_values)
+            .where(sql`${env_key_values.id} = ${id}`)
+            .catch((error) => {
+              logging.error(NAMESPACE, getErrorMessage(error), error);
+              const e = new DatabaseRequestError(
+                'Database query error.',
+                '501'
+              );
+              throw e;
+            })
+    if (envKeyValueRequested.length.valueOf() === 0) {
       logging.error(
         NAMESPACE,
-        'Database query failed to retrieve environment(s)! Environment array retrieved: ',
-        environmentRequested
+        'Database query failed to retrieve env_key_value(s)! Env_key_value array retrieved: ',
+        envKeyValueRequested
       )
-      const e = new DatabaseRequestError('Environment(s) do not exist', '404');
+      const e = new DatabaseRequestError('Env_key_value(s) do not exist', '404');
       throw e;
     }
-    logging.info(NAMESPACE, '---------END OF GET ENVIRONMENTS PROCESS---------')
+
+    logging.info(NAMESPACE, '---------END OF GET ENV_KEY_VALUEs PROCESS---------')
     return {
       statusCode: 200,
       data: {
         message: `The following here is the data:`,
-        environmentData: environmentRequested,
+        envKeyValueData: envKeyValueRequested,
         authData: data,
       },
     };
@@ -167,8 +179,8 @@ const getEnvironments: eventHandler = async (event) => {
   }
 };
 
-// deletes an environment from environments DB.
-const deleteEnvironment: eventHandler = async (event) => {
+// deletes an env_key_value from environments DB.
+const deleteEnvKeyValue: eventHandler =async (event) => {
   const { id, data } = event.payload as PayloadWithIdData;
 
   try {
@@ -176,15 +188,15 @@ const deleteEnvironment: eventHandler = async (event) => {
       const e = new DatabaseRequestError(
         'Missing id parameter',
         '401'
-      );
+      )
       throw e;
     }
-    logging.info(NAMESPACE, 'Deleting environment from database.');
+    logging.info(NAMESPACE, 'Deleting env_key_value from database.');
 
-    // deleting environment from environments DB.
-    const deletedEnvironment = await db
-      .delete(environments)
-      .where(eq(environments.id, id))
+    // deleting env_key_value from env_key_values DB.
+    const deletedEnvKeyValue = await db
+      .delete(env_key_values)
+      .where(eq(env_key_values.id, id))
       .returning()
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);
@@ -192,21 +204,20 @@ const deleteEnvironment: eventHandler = async (event) => {
         throw e;
       });
 
-    if (deletedEnvironment.length.valueOf() === 0) {
+    if (deletedEnvKeyValue.length.valueOf() === 0) {
       logging.error(
         NAMESPACE,
-        'Database query failed to retrieve environment! Environment array retrieved: ',
-        deletedEnvironment
+        'Database query failed to retrieve Env_key_value! Env_key_value array retrieved: ',
+        deletedEnvKeyValue
       );
-      const e = new DatabaseRequestError('Environment does not exist.', '404');
+      const e = new DatabaseRequestError('Env_key_value does not exist.', '404');
       throw e;
     }
 
-    // inserting new delete environment into logs DB.
+    // inserting new delete env_key_value into logs DB.
     const jsonContent = {
-      user_data:
-        data.name + " has deleted environment: " + deletedEnvironment[0].name + "."
-    }
+      user_data: data.name + " has deleted env_key_value: " + deletedEnvKeyValue[0].value + "."
+    };
     const deleteOneLog = await db
       .insert(logs)
       .values({
@@ -233,12 +244,12 @@ const deleteEnvironment: eventHandler = async (event) => {
       throw e;      
     }
 
-    logging.info(NAMESPACE, '---------END OF DELETE ENVIRONMENT PROCESS---------');
+    logging.info(NAMESPACE, '---------END OF DELETE ENV_KEY_VALUE PROCESS---------');
     return {
       statusCode: 200,
       data: {
         message: 'The following environment has been deleted from database:',
-        environmentData: deleteEnvironment[0],
+        envKeyValueData: deleteEnvKeyValue[0],
         authData: data,
       },
     };
@@ -251,18 +262,17 @@ const deleteEnvironment: eventHandler = async (event) => {
       error: new Error('Delete one request failed.'),
     };
   }
-};
+}
 
-// deletes all environments from environments DB.
-const deleteAllEnvironments: eventHandler = async (event) => {
+const deleteAllEnKeyValues: eventHandler = async (event) => {
   const { data } = event.payload as PayloadWithData;
-  
-  try {
-    logging.info(NAMESPACE, 'Deleting ALL environments from database.');
 
-    // deleting all environments from database.
-    const deletedEnvironments = await db
-      .delete(environments)
+  try {
+    logging.info(NAMESPACE, 'Deleting ALL env_key_values from database.');
+
+    // deleting all env_key_value from database.
+    const deletedEnvKeyValues = await db
+      .delete(env_key_values)
       .returning()
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);
@@ -270,21 +280,21 @@ const deleteAllEnvironments: eventHandler = async (event) => {
         throw e;
       });
     
-    if (deletedEnvironments.length.valueOf() === 0) {
+    if (deletedEnvKeyValues.length.valueOf() === 0) {
       logging.error(
         NAMESPACE,
-        'Database query failed to retrieve environments! Environment array retrieved: ',
-        deletedEnvironments
+        'Database query failed to retrieve env_key_values! Env_key_value array retrieved: ',
+        deletedEnvKeyValues
       );
-      const e = new DatabaseRequestError('No environments exist.', '404');
+      const e = new DatabaseRequestError('No env_key_values exist.', '404');
       throw e;
     }
 
     // inserting new delete all environments into logs DB.
     const jsonContent = {
-      user_data: data.name + " has deleted all environments below.",
-      deletedEnvironments: deletedEnvironments
-    };
+      user_data: data.name + " has deleted all env_key_values below.",
+      deletedEnvKeyValues: deletedEnvKeyValues
+    }
 
     const deleteAllLog = await db
       .insert(logs)
@@ -298,7 +308,7 @@ const deleteAllEnvironments: eventHandler = async (event) => {
         const e = new DatabaseRequestError('Logs Database query error.', '501');
         throw e;
       });
-
+    
     if (deleteAllLog.length.valueOf() === 0) {
       logging.error(
         NAMESPACE,
@@ -306,18 +316,18 @@ const deleteAllEnvironments: eventHandler = async (event) => {
         deleteAllLog
       );
       const e = new DatabaseRequestError(
-        'Delete all environments log has not been added to database.',
+        'Delete all env_key_values log has not been added to database.',
         '501'
       );
       throw e;
     }
-    
-    logging.info(NAMESPACE, '---------END OF DELETE ALL ENVIRONMENTS PROCESS---------');
+
+    logging.info(NAMESPACE, '---------END OF DELETE ALL ENV_KEY_VALUES PROCESS---------');
     return {
       statusCode: 200,
       data: {
-        message: 'The following environments have been deleted from database:',
-        environmentData: deletedEnvironments,
+        message: 'The following env_key_values have been deleted from database:',
+        envKeyValueData: deletedEnvKeyValues,
         authData: data,
       },
     };
@@ -330,12 +340,11 @@ const deleteAllEnvironments: eventHandler = async (event) => {
       error: new Error('Delete all request failed!'),
     };
   }
-};
+}
 
-// updates an environment from environments DB.
-const updateEnvironment: eventHandler = async (event) => {
+const updateEnvKeyValue: eventHandler = async (event) => {
   const { id, data, body } = event.payload as PayloadWithIdDataBody;
-  const { name } = body as UpdateEnvReqBody;
+  const { value, encryption_method } = body;
 
   try {
     if (!id) {
@@ -346,11 +355,14 @@ const updateEnvironment: eventHandler = async (event) => {
       throw e;
     }
 
-    if (name === undefined) {
+    if (value === undefined || encryption_method === undefined) {
       logging.error(
         NAMESPACE,
-        'Missing parameter to update environment data! Parameters retrieved: \n',
-        { name: name }
+        'Missing parameters to update env_key_value data! Parameters retrieved: \n',
+        { 
+          value: value, 
+          encryption_method: encryption_method 
+        }
       );
       const e = new BadUserRequestError(
         'Update request body cannot be empty!',
@@ -359,64 +371,93 @@ const updateEnvironment: eventHandler = async (event) => {
       throw e;
     }
 
-    logging.info(NAMESPACE, 'Updating environment in database.');
-    const originalEnvironment = await db
+    logging.info(NAMESPACE, 'Updating env_key_value in database.');
+    const originalEnvKeyValue = await db
       .select()
-      .from(environments)
-      .where(eq(environments.id, id))
+      .from(env_key_values)
+      .where(eq(env_key_values.id, id))
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);
         const e = new DatabaseRequestError('Get request query error!', '501');
         throw e;
       });
 
-    if (originalEnvironment.length.valueOf() === 0) {
+    if (originalEnvKeyValue.length.valueOf() === 0) {
       logging.error(NAMESPACE, 'Database query failed to retrieve environment!');
       const e = new DatabaseRequestError('Uuid given cannot be found!', '404');
       throw e;
     }
 
-    // updating the particular environment in environment DB.
-    await db
-      .update(environments)
-      .set({ name: name })
-      .where(eq(environments.id, id))
-      .catch((error) => {
-        logging.error(NAMESPACE, getErrorMessage(error), error);
-        const e = new DatabaseRequestError(
-          'Update environments database query error!',
-          '501'
-        );
-        throw e;
-      });
-    
-    const updatedEnvironment = await db
-      .select()
-      .from(environments)
-      .where(eq(environments.id, id))
-      .catch((error) => {
-        logging.error(NAMESPACE, getErrorMessage(error), error);
-        const e = new DatabaseRequestError(
-          'Get request query error!',
-          '501'
-        );
-        throw e;
-      });
-    
-    if (updatedEnvironment.length.valueOf() === 0) {
-      logging.error(NAMESPACE, 'Database query failed to retrieve environment!');
+    // updating the particular env_key_value in env_key_values DB.
+    let hasUpdated: boolean = false;
+    if (value) {
+      await db
+        .update(env_key_values)
+        .set({ value: value })
+        .where(eq(env_key_values.id, id))
+        .catch((error) => {
+          logging.error(NAMESPACE, getErrorMessage(error), error);
+          const e = new DatabaseRequestError(
+            'Update env_key_values database query error!',
+            '501'
+          );
+          throw e;
+        });
+      hasUpdated = true;
+    }
+    if (encryption_method) {
+      await db
+        .update(env_key_values)
+        .set({ encryption_method: sql`${encryption_method}` })
+        .where(eq(env_key_values.id, id))
+        .catch((error) => {
+          logging.error(NAMESPACE, getErrorMessage(error), error);
+          const e = new DatabaseRequestError(
+            'Update env_key_values database query error!',
+            '501'
+          );
+          throw e;
+        });
+      hasUpdated = true;
+    }
+
+    if (!hasUpdated) {
+      logging.error(
+        NAMESPACE, 
+        'No parameters were updated, update request failed. Printing hasUpdated: ',
+        hasUpdated
+      );
       const e = new DatabaseRequestError(
-        'Update process failed please check request body parameters.',
-        '501'
-      )
+        'Update request failed after running database update query.',
+        '500'
+      );
       throw e;
     }
 
-    // inserting update environment into logs DB.
+    const updatedEnvKeyValue = await db
+      .select()
+      .from(env_key_values)
+      .where(eq(env_key_values.id, id))
+      .catch((error) => {
+        logging.error(NAMESPACE, getErrorMessage(error), error);
+        const e = new DatabaseRequestError('Get request query error!', '501');
+        throw e;
+      });
+
+    if (updateEnvKeyValue.length.valueOf() === 0) {
+      logging.error(NAMESPACE, 'Database query failed to retrieve env_key_value!');
+      const e = new DatabaseRequestError(
+        'Update process failed please check request body parameters.',
+        '501'
+      );
+      throw e;
+    }
+
+    // inserting update env_key_value into log DB.
     const jsonContent = {
-      user_data: data.name + " has updated environment: " + originalEnvironment[0].name + ".",
-      originalEnvironment: originalEnvironment[0],
-      updateEnvironment: updateEnvironment[0]
+      user_data: data.name + " has updated env_key_value: " + originalEnvKeyValue[0] + ".",
+      originalProject: originalEnvKeyValue[0],
+      updatedProject: updatedEnvKeyValue[0]
     };
 
     const updateLog = await db
@@ -438,21 +479,24 @@ const updateEnvironment: eventHandler = async (event) => {
         'Database query failed to retrieve delete log! Log array retrieved: ',
         updateLog
       );
-      const e = new DatabaseRequestError('Update environment log has not been added to database.', '501');
+      const e = new DatabaseRequestError(
+        'Update env_key_value log has not been added to database.', 
+        '501'
+      );
       throw e;
     }
 
-    logging.info(NAMESPACE, '---------END OF UPDATE ENVIRONMENT PROCESS---------');
+    logging.info(NAMESPACE, '---------END OF UPDATE ENV_KEY_VALUE PROCESS---------');
     return {
       statusCode: 202,
       data: {
         message: 'The following user has been updated in database:',
-        originalProject: originalEnvironment[0],
-        updatedProject: updateEnvironment[0],
+        originalProject: originalEnvKeyValue[0],
+        updatedProject: updatedEnvKeyValue[0],
         authData: data,
       },
     };
-    
+
   } catch (error) {
     logging.error(NAMESPACE, getErrorMessage(error), error);
     const code = parseInt(getErrorName(error));
@@ -462,12 +506,12 @@ const updateEnvironment: eventHandler = async (event) => {
       error: new Error('Update request failed.'),
     };
   }
-};
+}
 
 export default {
-  createNewEnvironment,
-  getEnvironments,
-  deleteEnvironment,
-  deleteAllEnvironments,
-  updateEnvironment
+  createNewEnvKeyValue,
+  getEnvKeyValues,
+  deleteEnvKeyValue,
+  deleteAllEnKeyValues,
+  updateEnvKeyValue
 };

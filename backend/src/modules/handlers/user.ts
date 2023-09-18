@@ -225,7 +225,7 @@ const updateUser: eventHandler = async (event) => {
       throw e;
     }
 
-    let updated: boolean = false;
+    let hasUpdated: boolean = false;
     if (name) {
       await db
         .update(users)
@@ -239,7 +239,7 @@ const updateUser: eventHandler = async (event) => {
           );
           throw e;
         });
-      updated = true;
+      hasUpdated = true;
     }
     if (email) {
       await db
@@ -254,7 +254,7 @@ const updateUser: eventHandler = async (event) => {
           );
           throw e;
         });
-      updated = true;
+      hasUpdated = true;
     }
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -270,7 +270,20 @@ const updateUser: eventHandler = async (event) => {
           );
           throw e;
         });
-      updated = true;
+      hasUpdated = true;
+    }
+
+    if (!hasUpdated) {
+      logging.error(
+        NAMESPACE, 
+        'No parameters were updated, update request failed. Printing hasUpdated: ',
+        hasUpdated
+      );
+      const e = new DatabaseRequestError(
+        'Update request failed after running database update query.',
+        '500'
+      );
+      throw e;
     }
 
     const updatedUser = await db

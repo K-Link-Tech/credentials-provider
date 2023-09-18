@@ -6,6 +6,8 @@ import userRouter from './modules/routes/users-routes';
 import authRouter from './modules/routes/auth-routes';
 import projRouter from './modules/routes/project-routes';
 import envsRouter from './modules/routes/environment-routes';
+import envkeysRouter from './modules/routes/env_key_values-routes';
+
 import path from 'path';
 
 dotenv.config({
@@ -26,7 +28,8 @@ app.use(cookieParser());
 app.use('/api/users', userRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/proj', projRouter);
-app.use('/api/proj/envs', envsRouter);
+app.use('/api/envs', envsRouter);
+app.use('/api/envkeys', envkeysRouter) ;
 
 
 
