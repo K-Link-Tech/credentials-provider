@@ -92,11 +92,11 @@ const validateToken: eventHandler = async (event) => {
 };
 
 const register: eventHandler = async (event) => {
-  const { name, email, password } = event.payload as RegisterReq;
+  const { name, email, password, role } = event.payload as RegisterReq;
   try {
-    if (!email || !password || !name) {
+    if (!email || !password || !name || !role) {
       const e = new BadUserRequestError(
-        'Missing name, email, password parameter(s).',
+        'Missing name, email, password, role parameter(s).',
         '401'
       );
       throw e;
@@ -108,6 +108,7 @@ const register: eventHandler = async (event) => {
       .insert(users)
       .values({
         name: name,
+        role: role,
         email: email,
         password: hashedPassword,
       }).returning()

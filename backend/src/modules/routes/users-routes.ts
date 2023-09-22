@@ -1,8 +1,13 @@
-import { Request, Router } from 'express';
 import handler from '../handlers/user';
-import { routerEnclose, routerEncloseAuthentication } from '../../utils/routerEnclose';
+import { Request, Router } from 'express';
+import { authAdmin, authUser } from '../../middleware/authRole';
 import authenticateToken from '../../middleware/authorization';
 import { DecodedJWTObj } from '../interfaces/authRequest.interface';
+import { 
+  routerEnclose, 
+  routerEncloseAuthentication, 
+  routerEnclosePermissions 
+} from '../../utils/routerEnclose';
 
 const router = Router();
 
@@ -17,6 +22,18 @@ router.get(
       payload: {
         accessToken: accessToken,
         refreshToken: refreshToken
+      }
+    }
+  }),
+  routerEnclosePermissions(authUser, (req: Request) => {
+    const params = req.params.id;
+    const data = req.body.data as DecodedJWTObj;
+    return {
+      source: "express",
+      payload: {
+        role: data.role,
+        paramsId: params,
+        userId: data.id
       }
     }
   }),
@@ -47,6 +64,15 @@ router.get(
       }
     }
   }),
+  routerEnclosePermissions(authAdmin, (req: Request) => {
+    const data = req.body.data as DecodedJWTObj;
+    return {
+      source: "express",
+      payload: {
+        role: data.role
+      }
+    }
+  }),
   routerEnclose(handler.getUsers, (req: Request) => {
     const data = req.body.data;
     return {
@@ -70,6 +96,18 @@ router.delete(
       payload: {
         accessToken: accessToken,
         refreshToken: refreshToken
+      }
+    }
+  }),
+  routerEnclosePermissions(authUser, (req: Request) => {
+    const params = req.params.id;
+    const data = req.body.data as DecodedJWTObj;
+    return {
+      source: "express",
+      payload: {
+        role: data.role,
+        paramsId: params,
+        userId: data.id
       }
     }
   }),
@@ -100,6 +138,15 @@ router.delete(
       }
     }
   }),
+  routerEnclosePermissions(authAdmin, (req: Request) => {
+    const data = req.body.data as DecodedJWTObj;
+    return {
+      source: "express",
+      payload: {
+        role: data.role
+      }
+    }
+  }),
   routerEnclose(handler.deleteAllUsers, (req: Request) => {
     const data = req.body.data;
     return {
@@ -123,6 +170,18 @@ router.patch(
       payload: {
         accessToken: accessToken,
         refreshToken: refreshToken
+      }
+    }
+  }),
+  routerEnclosePermissions(authUser, (req: Request) => {
+    const params = req.params.id;
+    const data = req.body.data as DecodedJWTObj;
+    return {
+      source: "express",
+      payload: {
+        role: data.role,
+        paramsId: params,
+        userId: data.id
       }
     }
   }),

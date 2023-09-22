@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import { resolve } from 'path';
 import { getErrorMessage } from './errorHandler';
 import logging from '../config/logging.config';
-import User from '../modules/interfaces/user.interface';
+import { User } from '../modules/interfaces/user.interface';
 import config from '../config/config';
 import { AuthenticationError } from './errorTypes';
 
@@ -38,6 +38,7 @@ const signJWT = (user: User, tokenType: string): string | Error => {
         id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role
       },
       privateKey,
       {

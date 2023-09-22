@@ -1,3 +1,4 @@
+type roles = "admin" | "user";
 interface LoginReq {
   email: string;
   password: string;
@@ -5,6 +6,7 @@ interface LoginReq {
 
 interface RegisterReq {
   name: string;
+  role: roles;
   email: string;
   password: string;
 }
@@ -22,6 +24,7 @@ interface DecodedJWTObj {
   id: string,
   name: string,
   email: string,
+  role: roles,
   iat: number,
   exp: number,
   iss: string

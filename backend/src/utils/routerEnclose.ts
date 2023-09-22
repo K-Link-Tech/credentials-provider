@@ -16,6 +16,12 @@ type handlerAuthReturnObject = {
     error: Error
 }
 
+type handlerRoleReturnObject = {
+    statusCode: number,
+    isAuthorized: boolean,
+    error: Error
+}
+
 /**
  * Variable to store namespace for logging.
  */
@@ -57,6 +63,28 @@ export const routerEncloseAuthentication: routerEncloseFunction = (fn, formatExc
             logging.info(NAMESPACE, "testing type of statusCode in AUTH: ", typeof(returnObject))
             if (returnObject.statusCode >= 200 && returnObject.statusCode < 300) {
                 req.body.data = returnObject.data;
+                return next();
+            } else {
+                return res.status(returnObject.statusCode).json(returnObject.error?.message);
+            }
+        },
+    );
+};
+
+/**
+ * This function supports Clean Architecture by by separating express web framework from middleware.
+ * 
+ * @param fn A permissions check function
+ * @param formatExchange A function processing the Request header or simply just Request.
+ * @returns Either NextFunction or Response with statuscode and error message depending on the returnObject of authentication function.
+ */
+export const routerEnclosePermissions: routerEncloseFunction = (fn, formatExchange) => (req, res, next) => {
+    logging.info(NAMESPACE, "PERMS function hit!")
+    fn(formatExchange ? formatExchange(req) : req).then(
+        (returnObject: handlerRoleReturnObject) => {
+            logging.info(NAMESPACE, "testing type of statusCode in AUTH: ", typeof(returnObject))
+            if (returnObject.statusCode >= 200 && returnObject.statusCode < 300) {
+                req.body.isAuthorized = returnObject.isAuthorized;
                 return next();
             } else {
                 return res.status(returnObject.statusCode).json(returnObject.error?.message);
