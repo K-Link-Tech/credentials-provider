@@ -16,7 +16,7 @@ const Register: React.FC = () => {
 
   const [pwd, setPwd] = useState("");
   const [isValidPwd, setIsValidPwd] = useState(false);
-  const [isPwdFocused, serIsPwdFocused] = useState(false);
+  const [isPwdFocused, setIsPwdFocused] = useState(false);
 
   const [matchPwd, setMatchPwd] = useState("");
   const [isValidMatch, setIsValidMatch] = useState(false);
@@ -55,12 +55,14 @@ const Register: React.FC = () => {
       <form>
         <label htmlFor="username">
           Username:
-          <span className={isValidName ? "valid" : "hide"}>
-            {<FaCheck style={{color: "green"}}/>}
-          </span>
-          <span className={isValidName || !user ? "hide" : "invalid"}>
-            <FaTimes style={{color: "red"}}/>
-          </span>
+          <FaCheck
+            className={isValidName ? "valid" : "hide"}
+            style={{ color: "green" }}
+          />
+          <FaTimes
+            className={isValidName || !user ? "hide" : "invalid"}
+            style={{ color: "red" }}
+          />
         </label>
         <input
           type="text"
@@ -68,6 +70,7 @@ const Register: React.FC = () => {
           ref={userRef}
           autoComplete="off"
           onChange={(e) => setUser(e.target.value)}
+          value={user}
           required
           aria-invalid={isValidName ? "false" : "true"}
           aria-describedby="uidnote"
@@ -77,9 +80,7 @@ const Register: React.FC = () => {
         <p
           id="uidnote"
           className={
-            isUserFocused && user && !isValidName
-              ? "instructions"
-              : " offscreen"
+            isUserFocused && user && !isValidName ? "instructions" : "offscreen"
           }
         >
           <FaInfoCircle style={{ color: "red" }} />
@@ -88,6 +89,46 @@ const Register: React.FC = () => {
           Must begin with a letter.
           <br />
           Only letters, numbers, underscores, hyphens and spaces allowed.
+        </p>
+
+        <label htmlFor="password">
+          Password:
+          <FaCheck
+            className={isValidPwd ? "valid" : "hide"}
+            style={{ color: "green" }}
+          />
+          <FaTimes
+            className={isValidPwd || !pwd ? "hide" : "invalid"}
+            style={{ color: "red" }}
+          />
+        </label>
+        <input
+          type="password"
+          id="password"
+          onChange={(e) => setPwd(e.target.value)}
+          value={pwd}
+          required
+          aria-invalid={isValidPwd ? "false" : "true"}
+          aria-describedby="pwdnote"
+          onFocus={() => setIsPwdFocused(true)}
+          onBlur={() => setIsPwdFocused(false)}
+        />
+        <p
+          id="pwdnote"
+          className={isPwdFocused && !isValidPwd ? "instructions" : "offscreen"}
+        >
+          <FaInfoCircle />
+          8 to 50 characters.
+          <br />
+          Must include uppercase and lowercase letters, a number and a special
+          character.
+          <br />
+          Allowed special characters:
+          <span aria-label="exclamation mark">!</span>
+          <span aria-label="at symbol">@</span>
+          <span aria-label="hashtag">#</span>
+          <span aria-label="dollar sign">$</span>
+          <span aria-label="percent">%</span>
         </p>
       </form>
     </section>
