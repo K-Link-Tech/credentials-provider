@@ -1,11 +1,15 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { FaInfoCircle, FaCheck, FaTimes } from "react-icons/fa";
+
+interface RegisterFormProps {
+  onRegisterNewUser: Function;
+}
 
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_\s]{1,150}$/;
 const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,50}$/;
 
-const Register = () => {
+const RegisterForm: React.FC<RegisterFormProps> = (props) => {
   const userRef: React.RefObject<HTMLInputElement> = React.createRef();
   const pwdRef: React.RefObject<HTMLInputElement> = React.createRef();
   const confirmPwdRef: React.RefObject<HTMLInputElement> = React.createRef();
@@ -23,8 +27,31 @@ const Register = () => {
   const [isValidMatch, setIsValidMatch] = useState(false);
   const [matchFocus, setMatchFocus] = useState(false);
 
+  const [success, setSuccess] = useState(false);
+
   const [errMsg, setErrMsg] = useState("");
-  const [success, setSuccess] = useState("");
+
+  const handleSubmit: React.FormEventHandler = (event: React.FormEvent) => {
+    // ensuring button is correctly enabled and not hacked
+    const userConfirmation: boolean = USER_REGEX.test(user);
+    const passwordConfirmation: boolean = PASSWORD_REGEX.test(pwd);
+    if (!userConfirmation || !passwordConfirmation) {
+      const newUserPayload = {
+        error: true,
+
+      };
+      props.onRegisterNewUser(newUserPayload);
+      setSuccess(false);
+    } else {
+      setSuccess(true);
+      const newUserPayload = {
+        username: user,
+        password: pwd,
+      };
+      props.onRegisterNewUser(newUserPayload);
+      // clear input fields
+    }
+  };
 
   useEffect(() => {
     userRef.current?.focus();
@@ -46,8 +73,15 @@ const Register = () => {
     setErrMsg("");
   }, [user, pwd, matchPwd]);
 
-  return (
-    <section>
+  return success ? (
+    <div>
+      <h1>Success</h1>
+      <p>
+        <a href="#">Sign In</a>
+      </p>
+    </div>
+  ) : (
+    <div>
       <p
         ref={errRef}
         className={errMsg ? "errmsg" : "offscreen"}
@@ -56,7 +90,7 @@ const Register = () => {
         {errMsg}
       </p>
       <h1>Register</h1>
-      <form>
+      <form onSubmit={handleSubmit}>
         {/* Username */}
         <label htmlFor="username">
           Username:
@@ -85,7 +119,9 @@ const Register = () => {
         {/* Instructions for Username */}
         <p
           id="uidnote"
-          className={userFocus && user && !isValidName ? "instructions" : "offscreen"}
+          className={
+            userFocus && user && !isValidName ? "instructions" : "offscreen"
+          }
         >
           <FaInfoCircle style={{ color: "red" }} />
           2 to 150 characters.
@@ -136,8 +172,14 @@ const Register = () => {
         {/* Confirm Password */}
         <label htmlFor="confirm_pwd">
           Confirm Password:
-          <FaCheck className={isValidMatch && matchPwd ? "valid" : "hide"} />
-          <FaTimes className={!isValidMatch && matchPwd ? "invalid" : "hide"} />
+          <FaCheck
+            className={isValidMatch && matchPwd ? "valid" : "hide"}
+            style={{ color: "green" }}
+          />
+          <FaTimes
+            className={!isValidMatch && matchPwd ? "invalid" : "hide"}
+            style={{ color: "red" }}
+          />
         </label>
         <input
           type="password"
@@ -158,9 +200,20 @@ const Register = () => {
           <FaInfoCircle />
           Must match the first password input field!
         </p>
+
+        <button disabled={!isValidName || !isValidPwd || !isValidMatch}>
+          Sign Up
+        </button>
       </form>
-    </section>
+      <p>
+        Already registered? <br />
+        <span>
+          {/*Insert react router link*/}
+          <a href="#">Sign In</a>
+        </span>
+      </p>
+    </div>
   );
 };
 
-export default Register;
+export default RegisterForm;
