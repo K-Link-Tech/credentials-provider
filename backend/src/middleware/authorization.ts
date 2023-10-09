@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { resolve } from 'path';
 import { verifyJWT } from '../utils/JWT-helpers';
 import logging from '../config/logging.config';
+import { extractJWTReq } from '../modules/interfaces/authRequest.interface';
 
 dotenv.config({ path: resolve(__dirname, '../../../../.env') });
 
@@ -10,25 +11,29 @@ const NAMESPACE = 'Authorization';
 
 type event = {
   source: string;
-  payload: string | undefined;
+  payload: object;
 };
 
 type eventHandler = (event: event) => Object;
 
+/**
+ * This function verifies if the access token stored in the header is valid or not.
+ * 
+ * @param event An event variable received from the express router containing the access token.
+ * @returns An object containing the statusCode and either the decoded jwt payload or an error. 
+ */
 const authenticateToken: eventHandler = async (event) => {
-  const authHeader = event.payload;
-  if (authHeader == undefined) {
+  const { accessToken } = event.payload as extractJWTReq;
+  if (accessToken == undefined) {
     logging.error(NAMESPACE, 'Authorization header is empty.');
     return {
       statusCode: 401,
       error: new Error('Null token received.'),
     };
   }
-  const token = authHeader.split(' ')[1];
-  logging.debug(NAMESPACE, 'Authorization header obtained.', token);
 
   try {
-    const accessDecoded = verifyJWT(token, 'accessPublicKey');
+    const accessDecoded = verifyJWT(accessToken, 'accessPublicKey');
     logging.debug(NAMESPACE, 'JWT verified!', accessDecoded);
     return {
       statusCode: 200,

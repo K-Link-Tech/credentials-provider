@@ -1,12 +1,42 @@
 import { Request, Router } from 'express';
-import handler from '../handlers/user';
-import { routerEnclose, routerEncloseAuthentication } from '../../utils/routerEnclose';
+import handler from '../handlers/project';
+import { 
+  routerEnclose, 
+  routerEncloseAuthentication 
+} from '../../utils/routerEnclose';
 import authenticateToken from '../../middleware/authorization';
-import { DecodedJWTObj } from '../interfaces/authRequest.interface';
+import {
+  PayloadWithNameUrlData,
+  PayloadWithData,
+  UpdateReqBody
+} from '../interfaces/projectRequest.interface';
 
 const router = Router();
 
-// get users by id
+// create new project
+router.post(
+  '/create',
+  routerEncloseAuthentication(authenticateToken, (req: Request) => {
+    const accessToken: string | undefined = req.headers.authorization?.split(' ')[1];
+    const refreshToken: string | undefined = req.headers.authorization?.split(' ')[2];
+    return {
+      source: "express",
+      payload: {
+        accessToken: accessToken,
+        refreshToken: refreshToken
+      }
+    }
+  }),
+  routerEnclose(handler.createNewProject, (req: Request) => {
+    const body: PayloadWithNameUrlData = req.body;
+    return {
+      source: "express",
+      payload: body
+    }
+  })
+);
+
+// get projects by id
 router.get(
   '/:id',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -20,20 +50,20 @@ router.get(
       }
     }
   }),
-  routerEnclose(handler.getUsers, (req: Request) => {
+  routerEnclose(handler.getProjects, (req: Request) => {
     const params = req.params.id;
-    const data = req.body.data as DecodedJWTObj;
+    const data: PayloadWithData = req.body.data;
     return {
       source: "express",
       payload: {
         id: params,
-        authData: data
+        data: data
       }
     }
   })
 );
 
-// get all users
+// get all projects
 router.get(
   '/',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -47,19 +77,16 @@ router.get(
       }
     }
   }),
-  routerEnclose(handler.getUsers, (req: Request) => {
-    const data = req.body.data;
+  routerEnclose(handler.getProjects, (req: Request) => {
+    const data = req.body as PayloadWithData;
     return {
       source: "express",
-      payload: {
-        id: null,
-        authData: data
-      }
+      payload: data
     }
   })
 );
 
-// deletes a specific user
+// deletes a specific project
 router.delete(
   '/:id',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -73,20 +100,20 @@ router.delete(
       }
     }
   }),
-  routerEnclose(handler.deleteUser, (req: Request) => {
-    const data = req.body.data;
+  routerEnclose(handler.deleteProject, (req: Request) => {
+    const data: PayloadWithData = req.body.data;
     const params = req.params.id;
     return {
       source: "express",
       payload: {
         id: params,
-        authData: data
+        data: data
       }
     }
   })
 );
 
-// deletes all users
+// deletes all projects
 router.delete(
   '/',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -100,19 +127,18 @@ router.delete(
       }
     }
   }),
-  routerEnclose(handler.deleteAllUsers, (req: Request) => {
-    const data = req.body.data;
+  routerEnclose(handler.deleteAllProjects, (req: Request) => {
+    const data: PayloadWithData = req.body.data;
     return {
       source: "express",
       payload: {
-        id: null,
-        authData: data
+        data: data
       }
     }
   })
 );
 
-// updates a user
+// updates a project
 router.patch(
   '/:id',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -126,14 +152,16 @@ router.patch(
       }
     }
   }),
-  routerEnclose(handler.updateUser, (req: Request) => {
-    const data = req.body;
+  routerEnclose(handler.updateProject, (req: Request) => {
+    const data: PayloadWithData = req.body.data;
+    const body: UpdateReqBody = req.body;
     const params = req.params.id;
     return {
       source: "express",
       payload: {
         id: params,
-        body: data
+        data: data,
+        body: body
       }
     }
   })

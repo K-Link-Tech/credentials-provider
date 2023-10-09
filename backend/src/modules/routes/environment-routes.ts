@@ -1,12 +1,39 @@
 import { Request, Router } from 'express';
-import handler from '../handlers/user';
-import { routerEnclose, routerEncloseAuthentication } from '../../utils/routerEnclose';
+import handler from '../handlers/environment';
+import { 
+  routerEnclose, 
+  routerEncloseAuthentication 
+} from '../../utils/routerEnclose';
 import authenticateToken from '../../middleware/authorization';
-import { DecodedJWTObj } from '../interfaces/authRequest.interface';
+import { PayloadWithData, PayloadWithNameProjectIdData, UpdateEnvReqBody } from '../interfaces/environmentRequest.interface';
+
 
 const router = Router();
 
-// get users by id
+// creates a new environment
+router.post(
+  '/create',
+  routerEncloseAuthentication(authenticateToken, (req: Request) => {
+    const accessToken: string | undefined = req.headers.authorization?.split(' ')[1];
+    const refreshToken: string | undefined = req.headers.authorization?.split(' ')[2];
+    return {
+      source: "express",
+      payload: {
+        accessToken: accessToken,
+        refreshToken: refreshToken
+      }
+    }
+  }),
+  routerEnclose(handler.createNewEnvironment, (req: Request) => {
+    const body: PayloadWithNameProjectIdData = req.body;
+    return {
+      source: "express",
+      payload: body
+    }
+  })
+);
+
+// get environment by id
 router.get(
   '/:id',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -20,20 +47,20 @@ router.get(
       }
     }
   }),
-  routerEnclose(handler.getUsers, (req: Request) => {
+  routerEnclose(handler.getEnvironments, (req: Request) => {
     const params = req.params.id;
-    const data = req.body.data as DecodedJWTObj;
+    const data: PayloadWithData = req.body.data;
     return {
       source: "express",
       payload: {
         id: params,
-        authData: data
+        data: data
       }
     }
   })
 );
 
-// get all users
+// get all environments
 router.get(
   '/',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -47,19 +74,16 @@ router.get(
       }
     }
   }),
-  routerEnclose(handler.getUsers, (req: Request) => {
-    const data = req.body.data;
+  routerEnclose(handler.getEnvironments, (req: Request) => {
+    const data = req.body as PayloadWithData;
     return {
       source: "express",
-      payload: {
-        id: null,
-        authData: data
-      }
+      payload: data
     }
   })
 );
 
-// deletes a specific user
+// deletes a specific environment
 router.delete(
   '/:id',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -73,20 +97,20 @@ router.delete(
       }
     }
   }),
-  routerEnclose(handler.deleteUser, (req: Request) => {
-    const data = req.body.data;
+  routerEnclose(handler.deleteEnvironment, (req: Request) => {
+    const data: PayloadWithData = req.body.data;
     const params = req.params.id;
     return {
       source: "express",
       payload: {
         id: params,
-        authData: data
+        data: data
       }
     }
   })
 );
 
-// deletes all users
+// deletes all environments
 router.delete(
   '/',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -100,19 +124,18 @@ router.delete(
       }
     }
   }),
-  routerEnclose(handler.deleteAllUsers, (req: Request) => {
-    const data = req.body.data;
+  routerEnclose(handler.deleteAllEnvironments, (req: Request) => {
+    const data: PayloadWithData = req.body.data;
     return {
       source: "express",
       payload: {
-        id: null,
-        authData: data
+        data: data
       }
     }
   })
 );
 
-// updates a user
+// updates an environment 
 router.patch(
   '/:id',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -126,18 +149,19 @@ router.patch(
       }
     }
   }),
-  routerEnclose(handler.updateUser, (req: Request) => {
-    const data = req.body;
+  routerEnclose(handler.updateEnvironment, (req: Request) => {
+    const data: PayloadWithData = req.body.data;
+    const body: UpdateEnvReqBody = req.body;
     const params = req.params.id;
     return {
       source: "express",
       payload: {
         id: params,
-        body: data
+        data: data,
+        body: body
       }
     }
   })
 );
-
 
 export default router;

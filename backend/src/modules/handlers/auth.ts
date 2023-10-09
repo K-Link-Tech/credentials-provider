@@ -13,6 +13,7 @@ import logging from '../../config/logging.config';
 import { getErrorMessage, getErrorName } from '../../utils/errorHandler';
 import {
   AuthenticationError,
+  BadUserRequestError,
   DatabaseRequestError,
 } from '../../utils/errorTypes';
 import { json } from 'drizzle-orm/pg-core';
@@ -31,7 +32,7 @@ const refreshAccessToken: eventHandler = async (event) => {
   const { id } = event.payload as DecodedJWTObj;
   try {
     if (!id) {
-      const e = new DatabaseRequestError('Missing id parameter', '401');
+      const e = new BadUserRequestError('Missing id parameter', '401');
       throw e;
     }
 
@@ -94,8 +95,8 @@ const register: eventHandler = async (event) => {
   const { name, email, password } = event.payload as RegisterReq;
   try {
     if (!email || !password || !name) {
-      const e = new DatabaseRequestError(
-        'Missing name, email, password parameter(s)',
+      const e = new BadUserRequestError(
+        'Missing name, email, password parameter(s).',
         '401'
       );
       throw e;
@@ -116,19 +117,47 @@ const register: eventHandler = async (event) => {
         throw e;
       });
 
-    await db
+    if (usersInDB.length.valueOf() === 0) {
+      logging.error(
+        NAMESPACE,
+        'Database query failed to retrieve user(s)! User array retrieved: ',
+        usersInDB
+      );
+      const e = new DatabaseRequestError(
+        'User has not been added to database.', 
+        '501'
+      );
+      throw e;
+    }
+    // inserting registering new user into logs DB.
+    const jsonContent = {
+      user_data: `New user created: ${usersInDB[0].name}`,
+      user_profile: usersInDB[0]
+    }
+    const registerLog = await db
       .insert(logs)
       .values({
         userId: usersInDB[0].id,
-        taskDetail: json('user_details').default({
-          user_data: `New user created: ${usersInDB[0].name}`
-        }),
+        taskDetail: sql`${jsonContent}::json`
       })
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);
         const e = new DatabaseRequestError('Logs Database query error.', '501');
         throw e;
       });
+
+      if (registerLog.length.valueOf() === 0) {
+        logging.error(
+          NAMESPACE,
+          'Database query failed to retrieve register log! Log array retrieved: ',
+          registerLog
+        );
+        const e = new DatabaseRequestError(
+          'Register log has not been added to database.', 
+          '501'
+        );
+        throw e;
+      }
 
     logging.info(NAMESPACE, 'Data has been sent to database.');
     logging.info(NAMESPACE, '---------END OF REGISTRATION PROCESS---------');
@@ -137,7 +166,7 @@ const register: eventHandler = async (event) => {
       statusCode: 201,
       data: {
         message: 'The following user has been registered:',
-        users: event.payload,
+        user: event.payload,
       },
     };
   } catch (error) {
@@ -157,8 +186,8 @@ const loginUser: eventHandler = async (event) => {
   
   try {
     if (!email || !password) {
-      const e = new DatabaseRequestError(
-        'Missing email or password parameter(s)',
+      const e = new BadUserRequestError(
+        'Missing email or password parameter(s).',
         '401'
       );
       throw e;
@@ -180,6 +209,7 @@ const loginUser: eventHandler = async (event) => {
       'Users info retrieved from database. User Retrieved data: \n',
       usersInDB
     );
+
     if (usersInDB.length == 0) {
       const e = new DatabaseRequestError(
         'Email is incorrect or not registered. Unable to retrieve user.',
@@ -190,27 +220,41 @@ const loginUser: eventHandler = async (event) => {
 
     const result = bcrypt.compareSync(password, usersInDB[0].password);
     if (!result) {
-      const e = new AuthenticationError('User(s) does not exist.', '404');
+      const e = new AuthenticationError('Password is wrong.', '401');
       throw e;
     }
     const refreshToken = signJWT(usersInDB[0], 'refreshPrivateKey');
     const accessToken = signJWT(usersInDB[0], 'accessPrivateKey');
 
-    //TODO: log table here create, insert new record into log table.
-    // write success if success and fail write error.
-    await db
-    .insert(logs)
-    .values({
-      userId: usersInDB[0].id,
-      taskDetail: json('user_details').default({
-        user_data: usersInDB[0].name + " logged in."
-      }),
-    })
-    .catch((error) => {
-      logging.error(NAMESPACE, getErrorMessage(error), error);
-      const e = new DatabaseRequestError('Logs Database query error.', '501');
+    // inserting user login into logs DB.
+    const jsonContent = {
+      user_data: usersInDB[0].name + " logged in."
+    }
+    const loginLog = await db
+      .insert(logs)
+      .values({
+        userId: usersInDB[0].id,
+        taskDetail: sql`${jsonContent}::json`
+      })
+      .returning()
+      .catch((error) => {
+        logging.error(NAMESPACE, getErrorMessage(error), error);
+        const e = new DatabaseRequestError('Logs Database query error.', '501');
+        throw e;
+      });
+    
+      if (loginLog.length.valueOf() === 0) {
+      logging.error(
+        NAMESPACE,
+        'Database query failed to retrieve login log! Log array retrieved: ',
+        loginLog
+      );
+      const e = new DatabaseRequestError(
+        'Login log has not been added to database.', 
+        '501'
+      );
       throw e;
-    });
+    }
 
     return {
       statusCode: 200,

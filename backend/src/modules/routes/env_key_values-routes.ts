@@ -1,14 +1,22 @@
 import { Request, Router } from 'express';
-import handler from '../handlers/user';
-import { routerEnclose, routerEncloseAuthentication } from '../../utils/routerEnclose';
+import handler from '../handlers/env_key_values';
 import authenticateToken from '../../middleware/authorization';
-import { DecodedJWTObj } from '../interfaces/authRequest.interface';
+import { 
+  routerEnclose, 
+  routerEncloseAuthentication 
+} from '../../utils/routerEnclose';
+import { 
+  PayloadWithData, 
+  PayloadWithValueEncryptionEnvironmentIdData, 
+  UpdateEnvKeyReqBody 
+} from '../interfaces/env_key_values.interfaceRequest';
+
 
 const router = Router();
 
-// get users by id
-router.get(
-  '/:id',
+// creates a new env_key_value
+router.post(
+  '/create',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
     const accessToken: string | undefined = req.headers.authorization?.split(' ')[1];
     const refreshToken: string | undefined = req.headers.authorization?.split(' ')[2];
@@ -20,20 +28,16 @@ router.get(
       }
     }
   }),
-  routerEnclose(handler.getUsers, (req: Request) => {
-    const params = req.params.id;
-    const data = req.body.data as DecodedJWTObj;
+  routerEnclose(handler.createNewEnvKeyValue, (req: Request) => {
+    const body: PayloadWithValueEncryptionEnvironmentIdData = req.body;
     return {
       source: "express",
-      payload: {
-        id: params,
-        authData: data
-      }
+      payload: body
     }
   })
 );
 
-// get all users
+// get all env_key_values
 router.get(
   '/',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -47,19 +51,16 @@ router.get(
       }
     }
   }),
-  routerEnclose(handler.getUsers, (req: Request) => {
-    const data = req.body.data;
+  routerEnclose(handler.getEnvKeyValues, (req: Request) => {
+    const data = req.body as PayloadWithData;
     return {
       source: "express",
-      payload: {
-        id: null,
-        authData: data
-      }
+      payload: data
     }
   })
 );
 
-// deletes a specific user
+// delete one env_key_values
 router.delete(
   '/:id',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -73,20 +74,20 @@ router.delete(
       }
     }
   }),
-  routerEnclose(handler.deleteUser, (req: Request) => {
-    const data = req.body.data;
+  routerEnclose(handler.deleteEnvKeyValue, (req: Request) => {
+    const data: PayloadWithData = req.body.data;
     const params = req.params.id;
     return {
       source: "express",
       payload: {
         id: params,
-        authData: data
+        data: data
       }
     }
   })
 );
 
-// deletes all users
+// deletes all env_key_values
 router.delete(
   '/',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -100,19 +101,18 @@ router.delete(
       }
     }
   }),
-  routerEnclose(handler.deleteAllUsers, (req: Request) => {
-    const data = req.body.data;
+  routerEnclose(handler.deleteAllEnKeyValues, (req: Request) => {
+    const data: PayloadWithData = req.body.data;
     return {
       source: "express",
       payload: {
-        id: null,
-        authData: data
+        data: data
       }
     }
   })
 );
 
-// updates a user
+// updates an env_key_value 
 router.patch(
   '/:id',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {
@@ -126,18 +126,19 @@ router.patch(
       }
     }
   }),
-  routerEnclose(handler.updateUser, (req: Request) => {
-    const data = req.body;
+  routerEnclose(handler.updateEnvKeyValue, (req: Request) => {
+    const data: PayloadWithData = req.body.data;
+    const body: UpdateEnvKeyReqBody = req.body;
     const params = req.params.id;
     return {
       source: "express",
       payload: {
         id: params,
-        body: data
+        data: data,
+        body: body
       }
     }
   })
 );
-
 
 export default router;

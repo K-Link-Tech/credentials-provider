@@ -2,9 +2,10 @@ import { pgTable, uuid, text, time, pgEnum } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { environments } from './environments.schema';
 
-export const encryptionEnum = pgEnum('encryptionAlgo', ['aes', 'rsa']);
-
-// TODO: Question: Should we consider bit-length for encryption?
+export const encryptionEnum = pgEnum(
+  'encryptionAlgo', 
+  ['aes-128', 'aes-192', 'aes-256', 'rsa-1024', 'rsa-2048']
+);
 
 export const env_key_values = pgTable('env_key_values', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -12,7 +13,10 @@ export const env_key_values = pgTable('env_key_values', {
   encryption_method: encryptionEnum('encryptionAlgo').notNull(),
   environment_id: uuid('environment_id')
     .notNull()
-    .references(() => environments.id),
+    .references(() => environments.id, {
+      onDelete: 'cascade',
+      onUpdate: 'cascade'
+    }),
   createdAt: time('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),

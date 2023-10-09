@@ -7,11 +7,17 @@ const NAMESPACE = 'Auth/extractJWT';
 
 type event = {
   source: string;
-  payload: Object;
+  payload: object;
 };
 
 type eventHandler = (event: event) => Object;
 
+/**
+ * This function verifies if both the access and refresh tokens stored in the header are valid or not.
+ * 
+ * @param event An event variable received from the express router containing both access and refresh tokens.
+ * @returns An object containing the statusCode and either an object containing the decoded jwt payload for both tokens or an error.
+ */
 const extractBothJWT: eventHandler = async (event) => {
   logging.info(NAMESPACE, 'Validating token...');
   const { accessToken, refreshToken } = event.payload as extractJWTReq;
@@ -50,6 +56,12 @@ const extractBothJWT: eventHandler = async (event) => {
   }
 };
 
+/**
+ * This function verifies if the refresh token stored in the header is valid or not.
+ *  
+ * @param eventAn Am event variable received from the express router containing the refresh token.
+ * @returns An object containing the statusCode and either the decoded jwt payload for refresh token or an error.
+ */
 const extractRefreshJWT: eventHandler = async (event) => {
   logging.info(NAMESPACE, 'Validating token...');
 
