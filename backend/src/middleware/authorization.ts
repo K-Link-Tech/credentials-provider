@@ -34,7 +34,6 @@ const authenticateToken: eventHandler = async (event) => {
 
   try {
     const accessDecoded = verifyJWT(accessToken, 'accessPublicKey');
-    logging.debug(NAMESPACE, 'JWT verified!', accessDecoded);
     return {
       statusCode: 200,
       data: accessDecoded,

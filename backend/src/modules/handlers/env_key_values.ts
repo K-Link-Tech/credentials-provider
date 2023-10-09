@@ -47,7 +47,7 @@ const createNewEnvKeyValue: eventHandler = async (event) => {
       .insert(env_key_values)
       .values({
         value: value,
-        encryption_method: sql`${encryption_method}`,
+        encryption_method: encryption_method,
         environment_id: environment_id
       })
       .returning()
@@ -408,7 +408,7 @@ const updateEnvKeyValue: eventHandler = async (event) => {
     if (encryption_method) {
       await db
         .update(env_key_values)
-        .set({ encryption_method: sql`${encryption_method}` })
+        .set({ encryption_method: encryption_method })
         .where(eq(env_key_values.id, id))
         .catch((error) => {
           logging.error(NAMESPACE, getErrorMessage(error), error);

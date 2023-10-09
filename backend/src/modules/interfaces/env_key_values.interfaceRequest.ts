@@ -1,9 +1,11 @@
 import { JwtPayload } from "jsonwebtoken";
 import { encryptionEnum } from "../../schema/env_key_values.schema"
 
+type encryption = "aes-128" | "aes-192" | "aes-256" | "rsa-1024" | "rsa-2048";
+
 interface PayloadWithValueEncryptionEnvironmentIdData {
   value: string;
-  encryption_method: typeof encryptionEnum;
+  encryption_method: encryption;
   environment_id: string;
   data: JwtPayload;
 }
@@ -13,7 +15,7 @@ interface PayloadWithIdDataBody {
   data: JwtPayload;
   body: {
     value: string,
-    encryption_method: typeof encryptionEnum;
+    encryption_method: encryption;
   };
 }
 

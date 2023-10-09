@@ -48,7 +48,7 @@ const extractBothJWT: eventHandler = async (event) => {
       };
     }
   } else {
-    logging.error(NAMESPACE, 'User is unauthorized!');
+    logging.error(NAMESPACE, 'Missing JWT tokes!');
     return {
       statusCode: 401,
       error: new Error('User is unauthorized!'),
@@ -85,7 +85,7 @@ const extractRefreshJWT: eventHandler = async (event) => {
       };
     }
   } else {
-    logging.error(NAMESPACE, 'Unauthorized refresh token!');
+    logging.error(NAMESPACE, 'Missing JWT refresh token!');
     return {
       statusCode: 401,
       error: new Error('User is unauthorized!'),
