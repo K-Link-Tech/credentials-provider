@@ -1,34 +1,23 @@
-import { useErrorBoundary } from "react-error-boundary";
-import SignInForm from "../components/SignInForm";
-import axios from "axios";
+import { useErrorBoundary } from 'react-error-boundary';
+import SignInForm from '../components/SignInForm';
+import axios from 'axios';
+import { BACKEND_API, LOGIN_URL } from '../utils/constants';
 
 interface IUserPayload {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
-
-const LOGIN_URL = "http://localhost:3000/api/auth/login";
 
 const Login: React.FC = () => {
   const { showBoundary } = useErrorBoundary();
   const loginUserHandler = async (userPayload: IUserPayload) => {
-    // throw new Error("Invalid username and/or password entry!");
     await axios
-      .post(
-        LOGIN_URL,
-        {
-          email: userPayload.email,
-          password: userPayload.password,
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        }
-      )
+      .post(LOGIN_URL, userPayload)
       .then((r) => {
-        console.log(r);
+        console.log('res', r);
       })
       .catch((error) => {
+        console.error(error);
         showBoundary(error);
       });
   };

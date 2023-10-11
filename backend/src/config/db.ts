@@ -6,7 +6,10 @@ import * as schema from '../schema';
 const connectionString =
   `postgres://${config.drizzle.user}:${config.drizzle.pass}@${config.drizzle.host}:${config.server.port}/${config.drizzle.database}` ||
   'postgres://postgres:Micahsim00**@localhost:5432/credential_provider';
+
+console.log(connectionString);
 const credentialProviderPG = postgres(connectionString, { max: 1 });
+
 const db: PostgresJsDatabase<typeof schema> = drizzle(credentialProviderPG, {
   schema,
 });

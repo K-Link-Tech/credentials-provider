@@ -1,13 +1,13 @@
-import { useState } from "react";
-import Card from "./cards/LoginCard";
+import { useState } from 'react';
+import Card from './cards/LoginCard';
 
 interface SignInFormProps {
   onSignIn: Function;
 }
 
-const SignInForm: React.FC<SignInFormProps> = (props) => {
-  const [email, setEmail] = useState("");
-  const [pwd, setPwd] = useState("");
+const SignInForm: React.FC<SignInFormProps> = ({ onSignIn }) => {
+  const [email, setEmail] = useState('');
+  const [pwd, setPwd] = useState('');
 
   const handleSignIn: React.FormEventHandler = (event: React.FormEvent) => {
     event.preventDefault();
@@ -15,7 +15,8 @@ const SignInForm: React.FC<SignInFormProps> = (props) => {
       email: email,
       password: pwd,
     };
-    props.onSignIn(userPayload);
+    console.log('user', userPayload);
+    onSignIn(userPayload);
     // setUser("");
     // setPwd("");
   };
