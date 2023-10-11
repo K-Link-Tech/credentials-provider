@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "../api/axios";
 import RegisterForm from "../components/RegisterForm";
 import { useErrorBoundary } from "react-error-boundary";
+import Card from "../components/cards/LoginCard";
 
 interface INewUserPayload {
   error: boolean;
@@ -38,9 +39,9 @@ const Register: React.FC = () => {
   };
 
   return (
-    <section>
+    <Card>
       <RegisterForm onRegisterNewUser={AddUserHandler} />
-    </section>
+    </Card>
   );
 };
 

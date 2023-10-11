@@ -11,16 +11,18 @@ import envkeysRouter from './modules/routes/env_key_values-routes';
 import path from 'path';
 
 dotenv.config({
-  path: path.join(__dirname, '../.env'),
+  path: path.join(__dirname, './../.env'),
 });
 
 console.log(process.env.PORT);
 
 const app: Express = express();
-const port = process.env.SERVER_PORT || 3000;
-const corsOption = { credentials: true, origin: `http://localhost:${port}` };
+const port = process.env.PORT || 3000;
+const corsOption = { 
+  credentials: true, 
+  origin: `http://localhost:${port}` || `http://localhost:3001`  };
 
-app.use(cors(corsOption));
+app.use(cors());
 app.use(json());
 app.use(cookieParser());
 

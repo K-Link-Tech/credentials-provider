@@ -1,6 +1,7 @@
+import React from "react";
 import { FallbackProps } from "react-error-boundary";
 
-export const DatabaseFetchingError = (props: FallbackProps) => {
+export const DatabaseFetchingError: React.ComponentType<FallbackProps> = (props) => {
   const { error, resetErrorBoundary } = props;
 
   return (
