@@ -18,6 +18,13 @@ body {
   min-height: 100vh;
   background-color: rgba(21,29,114,255);
 }
+
+@layer components {
+  .align-element{
+    @apply mx-auto max-w-7xl p-8
+  }
+}
+
 /* 
 .App {
 display: flex;

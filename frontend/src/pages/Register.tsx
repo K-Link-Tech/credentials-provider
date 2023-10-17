@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import axios from "../api/axios";
 import RegisterForm from "../components/RegisterForm";
 import { useErrorBoundary } from "react-error-boundary";

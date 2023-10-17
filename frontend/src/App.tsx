@@ -5,6 +5,7 @@ import { DatabaseFetchingError } from './components/errors/ErrorBoundaryComponen
 import Layout from './layout/Layout';
 import { Route, Routes } from 'react-router-dom';
 import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 
 const App: React.FC = () => {
   return (
@@ -18,6 +19,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/home" element={<Dashboard />} />
         </Routes>
       </ErrorBoundary>
     </Layout>
