@@ -1,7 +1,9 @@
-import { useErrorBoundary } from 'react-error-boundary';
+// import { useErrorBoundary } from 'react-error-boundary';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import SignInForm from '../components/SignInForm';
-import axios from 'axios';
 import { LOGIN_URL } from '../utils/constants';
+import { logUserIn } from '@/api/users';
+import { useErrorBoundary } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
 
 type LoginResponseObj = {
@@ -27,23 +29,26 @@ const Login: React.FC = () => {
   const { showBoundary } = useErrorBoundary();
   const navigate = useNavigate();
 
+  const mutation = useMutation({
+    mutationFn: logUserIn,
+    onSuccess: (r) => {
+      console.log("res", r);
+      const data: LoginResponseObj = r.data;
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      navigate("/home");
+    },
+    onError: (error) => {
+      console.error(error);
+      showBoundary(error);
+    }
+  })
+  
   const loginUserHandler = async (userPayload: IUserPayload) => {
     console.log('posting backend...');
     console.log('Login_url', LOGIN_URL);
-    await axios
-      .post(LOGIN_URL, userPayload)
-      .then((r) => {
-        console.log("res", r);
-        const data: LoginResponseObj = r.data;
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-        localStorage.setItem("user", JSON.stringify(data.user))
-        navigate('/home');
-      })
-      .catch((error) => {
-        console.error(error);
-        showBoundary(error);
-      });  
+    mutation.mutate(userPayload); 
   };
   return (
     <div className="flex w-full h-screen items-top align-middle justify-between">
