@@ -2,4 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}x
 
+html {
+  font-family: 'Nunito', sans-serif;
+  font-size: 22px;
+  color: #fff;
+}
+
+body {
+  min-height: 100vh;
+  background-color: rgba(21,29,114,255);
+}
+
+@layer components {
+  .align-element{
+    @apply mx-auto max-w-7xl p-8
+  }
+}
