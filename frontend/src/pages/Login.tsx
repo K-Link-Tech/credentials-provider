@@ -37,6 +37,7 @@ const Login: React.FC = () => {
         const data: LoginResponseObj = r.data;
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
+        localStorage.setItem("user", JSON.stringify(data.user))
         navigate('/home');
       })
       .catch((error) => {
