@@ -5,8 +5,9 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
-import axios from "../../api/axios";
-import { GET_ALL_USERS_URL, GET_USER_URL } from "../../utils/constants";
+import { useQuery } from "@tanstack/react-query";
+import { QUERY_KEY, usersQuery } from "@/utils/keys.constants";
+import { getAllUsers, getUser } from "@/api/users";
 
 type User = {
   id: string;
@@ -17,6 +18,19 @@ type User = {
   updatedAt: string;
   role: "user" | "admin";
 };
+type GetUsersResponseObj = {
+  message: string;
+  usersData: User[];
+  authData: {
+    id: string,
+    name: string,
+    email: string,
+    role: string,
+    iat: number,
+    exp: number,
+    iss: string
+  }
+}
 interface ICurrentUser {
   user: User;
 }
@@ -27,22 +41,40 @@ const UsersTable: React.FC<ICurrentUser> = (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState(emptyUsers);
 
+  const queryAllUsers = useQuery({
+    queryKey: QUERY_KEY.users,
+    queryFn: getAllUsers
+  })
+  const queryUser = useQuery({
+    queryKey: usersQuery.key(props.user.id),
+    queryFn: () => getUser(props.user.id)
+  })
+
   useEffect(() => {
     setIsLoading(true);
-    axios
-      .get(
-        props.user.role === "admin"
-          ? GET_ALL_USERS_URL
-          : `${GET_USER_URL}${props.user.id}`
-      )
-      .then((r) => {
-        console.log(r);
-        setData(r.data.usersData);
-        console.log("data fetched", data);
-        console.log("data fetched size", data.length.valueOf());
-        setIsLoading(false);
-        console.log("loading state", isLoading);
-      });
+    if (props.user.role === "admin") {
+      const { usersData } = queryAllUsers.data as GetUsersResponseObj;
+      setData(usersData);
+      setIsLoading(queryAllUsers.isLoading);
+    } else {
+      const { usersData } = queryUser.data as GetUsersResponseObj;
+      setData(usersData);
+      setIsLoading(queryUser.isLoading);
+    }
+    // axios
+    //   .get(
+    //     props.user.role === "admin"
+    //       ? GET_ALL_USERS_URL
+    //       : `${GET_USER_URL}${props.user.id}`
+    //   )
+    //   .then((r) => {
+    //     console.log(r);
+    //     setData(r.data.usersData);
+    //     console.log("data fetched", data);
+    //     console.log("data fetched size", data.length.valueOf());
+    //     setIsLoading(false);
+    //     console.log("loading state", isLoading);
+    //   });
   }, []);
 
   const columnHelper = createColumnHelper<User>();
