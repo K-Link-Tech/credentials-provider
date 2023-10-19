@@ -1,5 +1,5 @@
 import { GET_ALL_USERS_URL, GET_USER_URL, LOGIN_URL } from "@/utils/constants";
-import axios from "axios";
+import api from "./axios";
 
 
 interface IUserPayload {
@@ -8,16 +8,16 @@ interface IUserPayload {
 }
 
 const logUserIn = async (userPayload: IUserPayload) => {
-  return await axios.post(LOGIN_URL, userPayload);
+  return await api.post(LOGIN_URL, userPayload);
 };
 
 const getUser = async (id: string) => {
-  const r = await axios.get(`${GET_USER_URL}/${id}`);
+  const r = await api.get(`${GET_USER_URL}/${id}`);
   return r.data
 }
 
 const getAllUsers = async () => {
-  const r = await axios.get(GET_ALL_USERS_URL);
+  const r = await api.get(GET_ALL_USERS_URL);
   return r.data;
 }
 
