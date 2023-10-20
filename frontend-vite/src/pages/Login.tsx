@@ -1,5 +1,5 @@
 // import { useErrorBoundary } from 'react-error-boundary';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import SignInForm from '../components/SignInForm';
 import { LOGIN_URL } from '../utils/constants';
 import { logUserIn } from '@/api/users';
