@@ -1,6 +1,7 @@
 
 export const QUERY_KEY = {
   users: ["users"],
+  projects: ["projects"]
 } as const;
 
 export const usersQuery = {

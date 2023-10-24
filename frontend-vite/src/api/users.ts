@@ -1,4 +1,4 @@
-import { GET_ALL_USERS_URL, GET_USER_URL, LOGIN_URL } from "@/utils/constants";
+import { ALL_USERS_URL, ONE_USER_URL, LOGIN_URL } from "@/utils/constants";
 import api from "./axios";
 
 
@@ -11,18 +11,36 @@ const logUserIn = async (userPayload: IUserPayload) => {
   return await api.post(LOGIN_URL, userPayload);
 };
 
-const getUser = async (id: string) => {
-  const r = await api.get(`${GET_USER_URL}/${id}`);
+const getUser = async (id: string): Promise<IGetUsersData> => {
+  const r = await api.get(`${ONE_USER_URL}/${id}`);
   return r.data
 }
 
-const getAllUsers = async () => {
-  const r = await api.get(GET_ALL_USERS_URL);
+const getAllUsers = async (): Promise<IGetUsersData> => {
+  const r = await api.get(ALL_USERS_URL);
   return r.data;
+}
+
+const deleteUser = async (id: string) => {
+  const r = await api.delete(`${ONE_USER_URL}/${id}`);
+  return r.data
+}
+
+const deleteAllUsers = async () => {
+  const r = await api.delete(ALL_USERS_URL);
+  return r.data;
+}
+
+const updateUser = async (id: string) => {
+  const r = await api.patch(`${ONE_USER_URL}/${id}`);
+  return r.data
 }
 
 export {
   logUserIn,
   getUser,
-  getAllUsers
+  getAllUsers,
+  deleteUser,
+  deleteAllUsers,
+  updateUser
 };

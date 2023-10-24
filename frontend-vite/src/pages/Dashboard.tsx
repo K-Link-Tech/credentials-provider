@@ -1,97 +1,84 @@
-import UsersTable from "../components/tables/UsersTable";
-import { createColumnHelper } from "@tanstack/react-table";
+// import { UsersTable } from "../components/tables/UsersTable";
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { QUERY_KEY, usersQuery } from "@/utils/keys.constants";
 import { getAllUsers, getUser } from "@/api/users";
+import UsersTable from "@/components/tables/UsersTable";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getAllProjects } from "@/api/projects";
+import { projectColumns, userColumns } from "@/components/tables/columns";
+import ProjectsTable from "@/components/tables/ProjectsTable";
 
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  createdAt: string;
-  updatedAt: string;
-  role: "user" | "admin";
-};
-
-const columnHelper = createColumnHelper<User>();
-
-const columns = [
-  columnHelper.accessor("id", {
-    header: () => "Id",
-    cell: (info) => {
-      info.getValue();
-    },
-  }),
-  columnHelper.accessor("name", {
-    header: () => "Name",
-    cell: (info) => {
-      info.getValue();
-    },
-  }),
-  columnHelper.accessor("role", {
-    header: () => "Role",
-    cell: (info) => {
-      info.getValue();
-    },
-  }),
-  columnHelper.accessor("email", {
-    header: () => "Email",
-    cell: (info) => {
-      info.getValue();
-    },
-  }),
-  columnHelper.accessor("password", {
-    header: () => "Password",
-    cell: (info) => {
-      info.getValue();
-    },
-  }),
-  columnHelper.accessor("createdAt", {
-    header: () => "Created At",
-    cell: (info) => {
-      info.getValue();
-    },
-  }),
-  columnHelper.accessor("updatedAt", {
-    header: () => "Updated At",
-    cell: (info) => {
-      info.getValue();
-    },
-  }),
-];
-
-const Dashboard: React.FC = () => {
-  const userStringObj = localStorage.getItem("user");
-  const userObj: User = userStringObj && JSON.parse(userStringObj);
-  let queryObj: UseQueryResult<any, Error>;
-  if (userObj.role === "admin") {
-    queryObj = useQuery({
+const retrieveUsers = (
+  role: string,
+  id: string
+): UseQueryResult<any, Error> => {
+  let userQueryObj: UseQueryResult<any, Error>;
+  if (role === "admin") {
+    userQueryObj = useQuery({
       queryKey: QUERY_KEY.users,
       queryFn: getAllUsers,
     });
   } else {
-    queryObj = useQuery({
-      queryKey: usersQuery.key(userObj.id),
-      queryFn: () => getUser(userObj.id),
+    userQueryObj = useQuery({
+      queryKey: usersQuery.key(id),
+      queryFn: () => getUser(id),
     });
   }
+  return userQueryObj;
+};
+const retrieveProjects = (): UseQueryResult<any, Error> => {
+  let projectQueryObj: UseQueryResult<any, Error>;
+  projectQueryObj = useQuery({
+    queryKey: QUERY_KEY.projects,
+    queryFn: getAllProjects,
+  });
+  return projectQueryObj;
+};
 
-  if (queryObj.isLoading == true) {
+const Dashboard: React.FC = () => {
+  const userStringObj = localStorage.getItem("user");
+  const userObj: IUser = userStringObj && JSON.parse(userStringObj);
+  
+  let usersRetrieved: UseQueryResult<any, Error>;
+  usersRetrieved = retrieveUsers(userObj.role, userObj.id);
+  console.log("usersRetrieved: ", usersRetrieved);
+
+
+  let projectsRetrieved: UseQueryResult<any, Error>;
+  projectsRetrieved = retrieveProjects();
+  console.log("projectsRetrieved: ", projectsRetrieved);
+
+  if (usersRetrieved.isLoading == true || projectsRetrieved.isLoading == true) {
     return (
       <section>
         <p>Loading...</p>
       </section>
     );
   }
+
   return (
-    <section className="py-20 rounded-xl justify-center space-y-10 bg-white align-element">
+    <section className="py-10 rounded-xl justify-center space-y-5 bg-white align-element">
       <div className="border-b border-black pb-4">
-        <h2 className="text-3xl font-medium">Projects</h2>
+        <h2 className="text-3xl font-medium text-center">Data</h2>
       </div>
-      <div className="">
-        <UsersTable data={queryObj.data.usersData} columns={columns} />
-      </div>
+      <Tabs defaultValue="users" className="space-y-4">
+        <TabsList className="w-full justify-evenly rounded-2xl">
+          <TabsTrigger value="users" className="w-full rounded-2xl">Users</TabsTrigger>
+          <TabsTrigger value="projects" className="w-full rounded-2xl">Projects</TabsTrigger>
+        </TabsList>
+        <TabsContent value="users">
+          <UsersTable
+            data={usersRetrieved.data.usersData}
+            columns={userColumns}
+          />
+        </TabsContent>
+        <TabsContent value="projects">
+          <ProjectsTable
+            data={projectsRetrieved.data.projectsData}
+            columns={projectColumns}
+          />
+        </TabsContent>
+      </Tabs>
     </section>
   );
 };

@@ -5,7 +5,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-export default function UsersTable<TData>({
+export default function ProjectsTable<TData>({
   data,
   columns,
 }: {
@@ -17,7 +17,7 @@ export default function UsersTable<TData>({
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-  console.log("usersData", data);
+  console.log("projectsData", data);
 
   return (
     <table className="border-collapse border-2 border-solid border-black min-w-full table-auto">

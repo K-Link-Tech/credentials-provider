@@ -32,7 +32,7 @@ const Login: React.FC = () => {
   const mutation = useMutation({
     mutationFn: logUserIn,
     onSuccess: (r) => {
-      console.log("res", r);
+      // console.log("res", r);
       const data: LoginResponseObj = r.data;
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);

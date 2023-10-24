@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const MainNavigation: React.FC = () => {
@@ -17,9 +17,9 @@ const MainNavigation: React.FC = () => {
               Login
             </Link>
           </li>
-          <Button asChild>
+          {/* <Button asChild>
             <Link to="/login">Login</Link>
-          </Button>
+          </Button> */}
         </ul>
       </nav>
     </header>
