@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useMemo } from "react";
 
 export default function ProjectsTable<TData>({
   data,
@@ -12,9 +13,12 @@ export default function ProjectsTable<TData>({
   data: TData[];
   columns: ColumnDef<TData, any>[];
 }) {
+  const finalData  = useMemo(()=> data, []);
+  const finalColumns  = useMemo(()=> columns, []);
+
   const table = useReactTable({
-    data,
-    columns,
+    data: finalData,
+    columns: finalColumns,
     getCoreRowModel: getCoreRowModel(),
   });
   console.log("projectsData", data);
@@ -41,18 +45,26 @@ export default function ProjectsTable<TData>({
         ))}
       </thead>
       <tbody>
-        {table.getRowModel().rows.map((row) => (
-          <tr key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <td
-                className="px-2 py-2 text-center border-black border-b-2 border-r-2 last:border-r-0"
-                key={cell.id}
-              >
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+      {table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <td
+                  className="px-2 py-2 text-center border-black border-b-2 border-r-2 last:border-r-0"
+                  key={cell.id}
+                >
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))
+          ) : (
+            <tr>
+              <td colSpan={columns.length} className="h-24 text-center">
+                No results.
               </td>
-            ))}
-          </tr>
-        ))}
+            </tr>
+          )}
       </tbody>
     </table>
   );

@@ -111,8 +111,7 @@ const register: eventHandler = async (event) => {
         role: role,
         email: email,
         password: hashedPassword,
-      })
-      .returning()
+      }).returning()
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);
         const e = new DatabaseRequestError('Database query error.', '501');
@@ -142,6 +141,7 @@ const register: eventHandler = async (event) => {
         userId: usersInDB[0].id,
         taskDetail: sql`${jsonContent}::json`,
       })
+      .returning()
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);
         const e = new DatabaseRequestError('Logs Database query error.', '501');
@@ -200,7 +200,7 @@ const loginUser: eventHandler = async (event) => {
       .from(users)
       .where(eq(users.email, email));
 
-    console.log('userinDB', usersInDB);
+    console.log('userInDB', usersInDB);
 
     if (!usersInDB) {
       return {
