@@ -1,5 +1,10 @@
-import { ALL_PROJECTS_URL, ONE_PROJECT_URL } from "@/utils/constants";
+import { ALL_PROJECTS_URL, CREATE_NEW_PROJECT_URL, ONE_PROJECT_URL } from "@/utils/constants";
 import api from "./axios";
+
+const createNewProject = async (projPayload: INewProject) => {
+  const r = await api.post(CREATE_NEW_PROJECT_URL, projPayload);
+  return r.data;
+}
 
 const getAllProjects = async () => {
   const r = await api.get(ALL_PROJECTS_URL);
@@ -27,6 +32,7 @@ const updateProject = async (id: string) => {
 }
 
 export {
+  createNewProject,
   getAllProjects,
   getProject,
   deleteAllProjects,

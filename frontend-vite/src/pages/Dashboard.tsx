@@ -7,6 +7,8 @@ import { getAllProjects } from "@/api/projects";
 import { projectColumns, userColumns } from "@/components/tables/columns";
 import ProjectsTable from "@/components/tables/ProjectsTable";
 import useStore from "@/store/useStore";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const retrieveUsers = (
   role: string,
@@ -44,15 +46,14 @@ const Dashboard: React.FC = () => {
   usersRetrieved = retrieveUsers(userObj.role, userObj.id);
   console.log("usersRetrieved: ", usersRetrieved);
 
-
   let projectsRetrieved: UseQueryResult<any, Error>;
   projectsRetrieved = retrieveProjects();
   console.log("projectsRetrieved: ", projectsRetrieved);
 
   if (usersRetrieved.isLoading == true || projectsRetrieved.isLoading == true) {
     return (
-      <section>
-        <p>Loading...</p>
+      <section className="flex items-center justify-center mx-auto my-auto">
+        <p className="text-8xl text-white font-bold">Loading...</p>
       </section>
     );
   }
@@ -64,8 +65,12 @@ const Dashboard: React.FC = () => {
       </div>
       <Tabs defaultValue="users" className="space-y-4">
         <TabsList className="w-full justify-evenly rounded-2xl">
-          <TabsTrigger value="users" className="w-full rounded-2xl">Users</TabsTrigger>
-          <TabsTrigger value="projects" className="w-full rounded-2xl">Projects</TabsTrigger>
+          <TabsTrigger value="users" className="w-full rounded-2xl">
+            Users
+          </TabsTrigger>
+          <TabsTrigger value="projects" className="w-full rounded-2xl">
+            Projects
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="users">
           <UsersTable
@@ -73,11 +78,14 @@ const Dashboard: React.FC = () => {
             columns={userColumns}
           />
         </TabsContent>
-        <TabsContent value="projects">
+        <TabsContent value="projects" className="flex-col flex mx-auto space-y-4">
           <ProjectsTable
             data={projectsRetrieved.data.projectsData}
             columns={projectColumns}
           />
+          <Button>
+            <Link to="/home/proj/create">Add New Project</Link>
+          </Button>
         </TabsContent>
       </Tabs>
     </section>

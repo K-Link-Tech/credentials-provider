@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Card from './cards/LoginCard';
+import Card from '../cards/LoginCard';
 
 interface SignInFormProps {
   onSignIn: Function;

@@ -29,8 +29,8 @@ const Project: React.FC = () => {
 
   if (environmentsRetrieved.isLoading == true) {
     return (
-      <section>
-        <p>Loading...</p>
+      <section className="flex items-center justify-center mx-auto my-auto">
+        <p className="text-8xl text-white font-bold">Loading...</p>
       </section>
     );
   }
@@ -38,7 +38,7 @@ const Project: React.FC = () => {
   return (
     <section className="py-10 rounded-xl justify-center space-y-5 bg-white align-element">
       <div className="border-b border-black pb-4">
-        <h2 className="text-3xl font-medium text-center">Project: {projObj.name}</h2>
+        <h2 className="text-3xl font-medium text-center">Project {projObj.name} Environments</h2>
       </div>
       <div>
         <EnvironmentsTable
