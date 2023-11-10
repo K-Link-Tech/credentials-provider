@@ -33,7 +33,7 @@ router.post(
   })
 );
 
-// get environment by id
+// get environment by project id
 router.get(
   '/:id',
   routerEncloseAuthentication(authenticateToken, (req: Request) => {

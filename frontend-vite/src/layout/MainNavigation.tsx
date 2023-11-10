@@ -12,7 +12,7 @@ const MainNavigation: React.FC = () => {
           <li className="hover:underline">
             <Link
               className="p-2 bg-sky-300 rounded-xl hover:bg-sky-500 active:bg-sky-600"
-              to="/"
+              to="login"
             >
               Login
             </Link>

@@ -8,9 +8,10 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem("accessToken");
+    const refreshToken = localStorage.getItem("refreshToken");
     // console.log("Access Token", accessToken);
     if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+      config.headers.Authorization = `Bearer ${accessToken} ${refreshToken}`;
     }
     return config;
   },
@@ -30,13 +31,13 @@ api.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem("refreshToken");
-        const response = await axios.post("/api/refresh-token", { refreshToken });
-        const { accessToken } = response.data;
+        const response = await api.get("/api/auth/refresh");
+        const { accessSigningPayload } = response.data;
 
-        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('accessToken', accessSigningPayload);
 
         // Retry the original request with the new token
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${accessSigningPayload} ${refreshToken}`;
         return axios(originalRequest);
       } catch (error) {
         // Handle refresh token error or redirect to login

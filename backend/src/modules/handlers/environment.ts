@@ -129,7 +129,7 @@ const getEnvironments: eventHandler = async (event) => {
         : await db
           .select()
           .from(environments)
-          .where(sql`${environments.id} = ${id}`)
+          .where(sql`${environments.project_id} = ${id}`)
           .catch((error) => {
             logging.error(NAMESPACE, getErrorMessage(error), error);
             const e = new DatabaseRequestError(

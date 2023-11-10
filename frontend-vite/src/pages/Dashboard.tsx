@@ -1,4 +1,3 @@
-// import { UsersTable } from "../components/tables/UsersTable";
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { QUERY_KEY, usersQuery } from "@/utils/keys.constants";
 import { getAllUsers, getUser } from "@/api/users";
@@ -7,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAllProjects } from "@/api/projects";
 import { projectColumns, userColumns } from "@/components/tables/columns";
 import ProjectsTable from "@/components/tables/ProjectsTable";
+import useStore from "@/store/useStore";
 
 const retrieveUsers = (
   role: string,
@@ -36,9 +36,10 @@ const retrieveProjects = (): UseQueryResult<any, Error> => {
 };
 
 const Dashboard: React.FC = () => {
-  const userStringObj = localStorage.getItem("user");
-  const userObj: IUser = userStringObj && JSON.parse(userStringObj);
-  
+  // const userStringObj = localStorage.getItem("user");
+  // const userObj: IUser = userStringObj && JSON.parse(userStringObj);
+  const userObj: IUser = useStore((state) => state.user);
+
   let usersRetrieved: UseQueryResult<any, Error>;
   usersRetrieved = retrieveUsers(userObj.role, userObj.id);
   console.log("usersRetrieved: ", usersRetrieved);

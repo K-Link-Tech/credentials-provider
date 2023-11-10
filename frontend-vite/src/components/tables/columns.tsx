@@ -1,6 +1,6 @@
 import { createColumnHelper } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react"
- import { Button } from "@/components/ui/button"
+import { MoreHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,8 +8,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import moment from 'moment';
+} from "@/components/ui/dropdown-menu";
+import moment from "moment";
+import { Link } from "react-router-dom";
 
 const userColumnHelper = createColumnHelper<IUser>();
 
@@ -48,7 +49,7 @@ const userColumns = [
     header: () => "Created At",
     cell: (row) => {
       const date = new Date(row.getValue());
-      const formattedDate = moment(date).format("Do MMM YY, h:mm:ss a")
+      const formattedDate = moment(date).format("Do MMM YY, h:mm:ss a");
       return <div className="font-medium">{formattedDate}</div>;
     },
   }),
@@ -56,14 +57,15 @@ const userColumns = [
     header: () => "Updated At",
     cell: (row) => {
       const date = new Date(row.getValue());
-      const formattedDate = moment(date).format("Do MMM YY, h:mm:ss a")
-      return <div className="font-medium">{formattedDate}</div>;    },
+      const formattedDate = moment(date).format("Do MMM YY, h:mm:ss a");
+      return <div className="font-medium">{formattedDate}</div>;
+    },
   }),
   userColumnHelper.display({
     id: "actions",
-    cell: ({row}) => {
-      const user = row.original
- 
+    cell: ({ row }) => {
+      const user = row.original;
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -83,9 +85,9 @@ const userColumns = [
             <DropdownMenuItem>View user details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      )
+      );
     },
-  })
+  }),
 ];
 
 const projectColumnHelper = createColumnHelper<IProject>();
@@ -99,9 +101,14 @@ const projectColumns = [
   // }),
   projectColumnHelper.accessor("name", {
     header: () => "Name",
-    cell: (row) => {
-      return row.getValue();
-    },
+    cell: (row) => (
+      <Link
+        to={{ pathname: "/home/proj/" + `${row.row.original.id}` }}
+        className="p-1 ring-1 ring-black hover:underline hover:bg-sky-200 active:bg-sky-400"
+      >
+        {row.getValue()}
+      </Link>
+    ),
   }),
   projectColumnHelper.accessor("url", {
     header: () => "Url",
@@ -121,10 +128,66 @@ const projectColumns = [
       return row.getValue();
     },
   }),
+  projectColumnHelper.display({
+    id: "actions",
+    cell: ({ row }) => {
+      const project = row.original;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(project.id)}
+            >
+              Copy project ID
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  }),
 ];
 
+const environmentColumnHelper = createColumnHelper<IEnvironment>();
 
-export {
-  userColumns,
-  projectColumns
-}
+const environmentColumns = [
+  // environmentColumnHelper.accessor("id", {
+  //   header: () => "Id",
+  //   cell: (row) => {
+  //     return row.getValue();
+  //   },
+  // }),
+  environmentColumnHelper.accessor("name", {
+    header: () => "Name",
+    cell: (row) => {
+      return row.getValue();
+    },
+  }),
+  // environmentColumnHelper.accessor("project_id", {
+  //   header: () => "Project ID",
+  //   cell: (row) => {
+  //     return row.getValue();
+  //   },
+  // }),
+  environmentColumnHelper.accessor("createdAt", {
+    header: () => "Created At",
+    cell: (row) => {
+      return row.getValue();
+    },
+  }),
+  environmentColumnHelper.accessor("updatedAt", {
+    header: () => "Updated At",
+    cell: (row) => {
+      return row.getValue();
+    },
+  }),
+];
+
+export { userColumns, projectColumns, environmentColumns };

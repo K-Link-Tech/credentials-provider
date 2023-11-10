@@ -1,27 +1,9 @@
-import React from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
-import { DatabaseFetchingError } from './components/errors/ErrorBoundaryComponent';
-import { Route, Routes } from 'react-router-dom';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Layout from './layout/Layout';
+import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
 
 const App: React.FC = () => {
-  return (
-    <Layout>
-      <ErrorBoundary
-        FallbackComponent={DatabaseFetchingError}
-        onError={() => {
-          console.log('Error found');
-        }}
-      >
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/home" element={<Dashboard />} />
-        </Routes>
-      </ErrorBoundary>
-    </Layout>
-  );
+  const isUserValid = localStorage.getItem("accessToken");
+  return !!isUserValid ? <Outlet /> : <Navigate to={"/login"} />;
 };
 
 export default App;

@@ -8,3 +8,6 @@ export const ONE_USER_URL = `${BACKEND_API}/api/users`;
 
 export const ALL_PROJECTS_URL = `${BACKEND_API}/api/proj/`;
 export const ONE_PROJECT_URL = `${BACKEND_API}/api/proj`;
+
+export const ALL_ENVIRONMENTS_URL = `${BACKEND_API}/api/envs/`;
+export const ONE_ENVIRONMENT_URL = `${BACKEND_API}/api/envs`;
