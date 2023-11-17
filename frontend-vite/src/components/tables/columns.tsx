@@ -166,9 +166,14 @@ const environmentColumns = [
   // }),
   environmentColumnHelper.accessor("name", {
     header: () => "Name",
-    cell: (row) => {
-      return row.getValue();
-    },
+    cell: (row) => (
+      <Link
+        to={{ pathname: "/home/env/" + `${row.row.original.id}` }}
+        className="p-1 ring-1 ring-black hover:underline hover:bg-sky-200 active:bg-sky-400"
+      >
+        {row.getValue()}
+      </Link>
+    ),
   }),
   // environmentColumnHelper.accessor("project_id", {
   //   header: () => "Project ID",
@@ -190,4 +195,52 @@ const environmentColumns = [
   }),
 ];
 
-export { userColumns, projectColumns, environmentColumns };
+const envKeyValuesColumnHelper = createColumnHelper<IEnvKeyValue>();
+
+const envKeyValuesColumns = [
+  // envKeyValuesColumnHelper.accessor("id", {
+  //   header: () => "Id",
+  //   cell: (row) => {
+  //     return row.getValue();
+  //   },
+  // }),
+  envKeyValuesColumnHelper.accessor("key", {
+    header: () => "Key",
+    cell: (row) => {
+      return row.getValue();
+    },
+  }),
+  envKeyValuesColumnHelper.accessor("value", {
+    header: () => "Value",
+    cell: (row) => {
+      return row.getValue();
+    },
+  }),
+  // envKeyValuesColumnHelper.accessor("encryptionAlgo", {
+  //   header: () => "Project ID",
+  //   cell: (row) => {
+  //     return row.getValue();
+  //   },
+  // }),
+  envKeyValuesColumnHelper.accessor("environment_id", {
+    header: () => "Environment ID",
+    cell: (row) => {
+      return row.getValue();
+    },
+  }),
+  envKeyValuesColumnHelper.accessor("createdAt", {
+    header: () => "Created At",
+    cell: (row) => {
+      return row.getValue();
+    },
+  }),
+  envKeyValuesColumnHelper.accessor("updatedAt", {
+    header: () => "Updated At",
+    cell: (row) => {
+      return row.getValue();
+    },
+  }),
+];
+
+
+export { userColumns, projectColumns, environmentColumns, envKeyValuesColumns };

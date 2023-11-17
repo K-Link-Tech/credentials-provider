@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "b36b33af-2043-463b-b208-4ed894bffddf",
+  "id": "7646f3c3-d55a-45b5-b088-07b795014b33",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "environments": {
@@ -79,6 +79,12 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         },
         "value": {
           "name": "value",
@@ -206,6 +212,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "role": {
+          "name": "role",
+          "type": "Roles",
+          "primaryKey": false,
+          "notNull": true
+        },
         "email": {
           "name": "email",
           "type": "text",
@@ -316,8 +328,18 @@
     "encryptionAlgo": {
       "name": "encryptionAlgo",
       "values": {
-        "aes": "aes",
-        "rsa": "rsa"
+        "aes-128": "aes-128",
+        "aes-192": "aes-192",
+        "aes-256": "aes-256",
+        "rsa-1024": "rsa-1024",
+        "rsa-2048": "rsa-2048"
+      }
+    },
+    "Roles": {
+      "name": "Roles",
+      "values": {
+        "admin": "admin",
+        "user": "user"
       }
     }
   },

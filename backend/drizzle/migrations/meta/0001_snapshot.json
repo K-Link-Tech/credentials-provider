@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "72a23ab6-7ada-458d-955d-84de691077db",
-  "prevId": "b36b33af-2043-463b-b208-4ed894bffddf",
+  "id": "b13d27b6-185b-404a-9b1b-6027ddc2415c",
+  "prevId": "7646f3c3-d55a-45b5-b088-07b795014b33",
   "tables": {
     "environments": {
       "name": "environments",
@@ -79,6 +79,12 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         },
         "value": {
           "name": "value",
@@ -206,6 +212,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "role": {
+          "name": "role",
+          "type": "Roles",
+          "primaryKey": false,
+          "notNull": true
+        },
         "email": {
           "name": "email",
           "type": "text",
@@ -237,13 +249,6 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "users_id_unique": {
-          "name": "users_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
-        },
         "users_name_unique": {
           "name": "users_name_unique",
           "nullsNotDistinct": false,
@@ -321,6 +326,13 @@
         "aes-256": "aes-256",
         "rsa-1024": "rsa-1024",
         "rsa-2048": "rsa-2048"
+      }
+    },
+    "Roles": {
+      "name": "Roles",
+      "values": {
+        "admin": "admin",
+        "user": "user"
       }
     }
   },

@@ -9,14 +9,15 @@ export const encryptionEnum = pgEnum(
 
 export const env_key_values = pgTable('env_key_values', {
   id: uuid('id').defaultRandom().primaryKey(),
+  key: text('key').notNull(),
   value: text('value').notNull(),
   encryption_method: encryptionEnum('encryptionAlgo').notNull(),
   environment_id: uuid('environment_id')
-    .notNull()
-    .references(() => environments.id, {
-      onDelete: 'cascade',
-      onUpdate: 'cascade'
-    }),
+  .notNull()
+  .references(() => environments.id, {
+    onDelete: 'cascade',
+    onUpdate: 'cascade'
+  }),
   createdAt: time('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),

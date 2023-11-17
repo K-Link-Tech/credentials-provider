@@ -15,6 +15,8 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { DatabaseFetchingError } from './components/errors/ErrorBoundaryComponent';
 import Project from "./pages/Project.tsx";
 import NewProject from "./pages/NewProject.tsx";
+import Environment from "./pages/Environment.tsx";
+import NewEnvironment from "./pages/NewEnvironment.tsx";
 
 const config: QueryClientConfig = {
   defaultOptions: {
@@ -41,6 +43,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <Route path="/home" element={<Dashboard />} />
               <Route path="/home/proj/:projId" element={<Project />} />
               <Route path="/home/proj/create" element={<NewProject />} />
+              <Route path="/home/env/:environmentId" element={<Environment />} />
+              <Route path="/home/env/create" element={<NewEnvironment />} />
             </Route>
             <Route path="/login" element={<Login />} />
             <Route path="*" element={<Login />} />

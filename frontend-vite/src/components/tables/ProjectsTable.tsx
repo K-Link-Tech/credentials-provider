@@ -65,7 +65,7 @@ export default function ProjectsTable<TData>({
           ) : (
             <tr>
               <td colSpan={columns.length} className="h-24 text-center">
-                No results.
+                No projects exist.
               </td>
             </tr>
           )}

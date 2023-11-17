@@ -1,6 +1,6 @@
 import db from '../../config/db';
 import bcrypt from 'bcrypt';
-import { and, eq, sql, arrayContains } from 'drizzle-orm';
+import { and, eq, like, sql                   } from 'drizzle-orm';
 import { getErrorMessage, getErrorName } from '../../utils/errorHandler';
 import logging from '../../config/logging.config';
 import { ReqParams, UpdateParams } from '../interfaces/usersRequest.interface';
@@ -68,7 +68,7 @@ const getUserLogs: eventHandler =async (event) => {
     };
   }
 }
-const getUserCreateLogs: eventHandler =async (event) => {
+const getUserCreateProjectsLogs: eventHandler =async (event) => {
   const { id, authData } = event.payload as ReqParams;
 
   if (id == null) {
@@ -83,7 +83,7 @@ const getUserCreateLogs: eventHandler =async (event) => {
       .where(
         and(
           sql`${logs.userId} = ${id}`,
-          arrayContains))
+          like(logs.taskDetail,"%created project%")))
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);
         const e = new DatabaseRequestError(
@@ -102,6 +102,7 @@ const getUserCreateLogs: eventHandler =async (event) => {
       throw e;
     }
     logging.info(NAMESPACE, '---------END OF GET LOGS PROCESS---------');
+    const projectsCreated: string[] = logsRequested.map()
     return {
       statusCode: 200,
       data: {
@@ -120,8 +121,6 @@ const getUserCreateLogs: eventHandler =async (event) => {
     };
   }
 }
-
-const 
 
 export {
   getUserLogs,

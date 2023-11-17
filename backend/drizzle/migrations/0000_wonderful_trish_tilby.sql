@@ -1,5 +1,11 @@
 DO $$ BEGIN
- CREATE TYPE "encryptionAlgo" AS ENUM('aes', 'rsa');
+ CREATE TYPE "encryptionAlgo" AS ENUM('aes-128', 'aes-192', 'aes-256', 'rsa-1024', 'rsa-2048');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "Roles" AS ENUM('admin', 'user');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -15,6 +21,7 @@ CREATE TABLE IF NOT EXISTS "environments" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "env_key_values" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"key" text NOT NULL,
 	"value" text NOT NULL,
 	"encryptionAlgo" "encryptionAlgo" NOT NULL,
 	"environment_id" uuid NOT NULL,
@@ -33,6 +40,7 @@ CREATE TABLE IF NOT EXISTS "logs" (
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
+	"role" "Roles" NOT NULL,
 	"email" text NOT NULL,
 	"password" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,

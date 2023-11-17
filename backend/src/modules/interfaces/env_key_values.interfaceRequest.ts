@@ -4,6 +4,7 @@ import { encryptionEnum } from "../../schema/env_key_values.schema"
 type encryption = "aes-128" | "aes-192" | "aes-256" | "rsa-1024" | "rsa-2048";
 
 interface PayloadWithValueEncryptionEnvironmentIdData {
+  key: string;
   value: string;
   encryption_method: encryption;
   environment_id: string;
@@ -14,8 +15,9 @@ interface PayloadWithIdDataBody {
   id: string;
   data: JwtPayload;
   body: {
-    value: string,
-    encryption_method: encryption;
+    key?: string,
+    value?: string,
+    encryption_method?: encryption
   };
 }
 

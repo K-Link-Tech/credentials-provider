@@ -447,8 +447,8 @@ const updateEnvironment: eventHandler = async (event) => {
       statusCode: 202,
       data: {
         message: 'The following user has been updated in database:',
-        originalProject: originalEnvironment[0],
-        updatedProject: updateEnvironment[0],
+        originalEnvironment: originalEnvironment[0],
+        updatedEnvironment: updateEnvironment[0],
         authData: data,
       },
     };

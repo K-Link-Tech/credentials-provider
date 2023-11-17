@@ -7,6 +7,7 @@ const doMigrate = async () => {
     try {
         // replace this with production server connection string in future
         const connectionString = `postgres://${config.drizzle.user}:${config.drizzle.pass}@${config.drizzle.host}:${config.server.port}/${config.drizzle.database}`;
+        console.log("migrate string: ",connectionString);
         const credentialProviderPG = postgres(connectionString, { max: 1 })
         const db = drizzle(credentialProviderPG);
 

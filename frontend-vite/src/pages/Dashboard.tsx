@@ -48,6 +48,7 @@ const Dashboard: React.FC = () => {
 
   let projectsRetrieved: UseQueryResult<any, Error>;
   projectsRetrieved = retrieveProjects();
+  const projectsData: IProject[] = projectsRetrieved.data === undefined ? [] : projectsRetrieved.data.projectsData;
   console.log("projectsRetrieved: ", projectsRetrieved);
 
   if (usersRetrieved.isLoading == true || projectsRetrieved.isLoading == true) {
@@ -80,7 +81,7 @@ const Dashboard: React.FC = () => {
         </TabsContent>
         <TabsContent value="projects" className="flex-col flex mx-auto space-y-4">
           <ProjectsTable
-            data={projectsRetrieved.data.projectsData}
+            data={projectsData}
             columns={projectColumns}
           />
           <Button>

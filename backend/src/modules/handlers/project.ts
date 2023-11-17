@@ -115,14 +115,14 @@ const createNewProject: eventHandler = async (event) => {
     }
 
     // inserting new create project log into logs DB.
-    const jsonContent = {
+    const jsonProjectContent = {
       user_data: data.name + " has created project: " + projectsInDB[0].name + "."
     };
-    const loginLog = await db
+    const createNewProjectLog = await db
       .insert(logs)
       .values({
         userId: data.id,
-        taskDetail: sql`${jsonContent}::json`
+        taskDetail: sql`${jsonProjectContent}::json`
       })
       .returning()
       .catch((error) => {
@@ -131,13 +131,70 @@ const createNewProject: eventHandler = async (event) => {
         throw e;
       });
 
-    if (loginLog.length.valueOf() === 0) {
+    if (createNewProjectLog.length.valueOf() === 0) {
       logging.error(
         NAMESPACE,
         'Database query failed to retrieve login log! Log array retrieved: ',
-        loginLog
+        createNewProjectLog
       );
       const e = new DatabaseRequestError('Login log has not been added to database.', '501');
+      throw e;
+    }
+    
+    // inserting new create uat environment log into logs DB.
+    const jsonUatEnvironmentContent = {
+      user_data: data.name + " has created new environment: " + uatEnvironment[0].name + "."
+    };
+    const createUatLog = await db
+      .insert(logs)
+      .values({
+        userId: data.id,
+        taskDetail: sql`${jsonUatEnvironmentContent}::json`
+      })
+      .returning()
+      .catch((error) => {
+        logging.error(NAMESPACE, getErrorMessage(error), error);
+        const e = new DatabaseRequestError('Logs Database query error.', '501');
+        throw e;
+      });
+    if (createUatLog.length.valueOf() === 0) {
+      logging.error(
+        NAMESPACE,
+        'Database query failed to retrieve create new environment log! Log array retrieved: ',
+        createUatLog
+      );
+      const e = new DatabaseRequestError(
+        'Create new environment log has not been added to database.',
+        '501'
+      );
+      throw e;
+    }
+    // inserting new create prod environment log into logs DB.
+    const jsonProdEnvironmentContent = {
+      user_data: data.name + " has created new environment: " + prodEnvironment[0].name + "."
+    };
+    const createProdLog = await db
+      .insert(logs)
+      .values({
+        userId: data.id,
+        taskDetail: sql`${jsonProdEnvironmentContent}::json`
+      })
+      .returning()
+      .catch((error) => {
+        logging.error(NAMESPACE, getErrorMessage(error), error);
+        const e = new DatabaseRequestError('Logs Database query error.', '501');
+        throw e;
+      });
+    if (createProdLog.length.valueOf() === 0) {
+      logging.error(
+        NAMESPACE,
+        'Database query failed to retrieve create new environment log! Log array retrieved: ',
+        createProdLog
+      );
+      const e = new DatabaseRequestError(
+        'Create new environment log has not been added to database.',
+        '501'
+      );
       throw e;
     }
 

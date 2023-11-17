@@ -1,5 +1,11 @@
-import { ALL_ENVIRONMENTS_URL, ONE_ENVIRONMENT_URL } from "@/utils/constants";
+import { ALL_ENVIRONMENTS_URL, CREATE_NEW_ENVIRONMENT_URL, ONE_ENVIRONMENT_URL } from "@/utils/constants";
 import api from "./axios";
+
+
+const createNewEnvironment = async (environmentPayload: INewEnvironment) => {
+  const r = await api.post(CREATE_NEW_ENVIRONMENT_URL, environmentPayload);
+  return r.data;
+}
 
 const getAllEnvironments = async () => {
   const r = await api.get(ALL_ENVIRONMENTS_URL);
@@ -27,6 +33,7 @@ const updateEnvironment = async (id: string) => {
 }
 
 export {
+  createNewEnvironment,
   getAllEnvironments,
   getEnvironment,
   deleteAllEnvironments,

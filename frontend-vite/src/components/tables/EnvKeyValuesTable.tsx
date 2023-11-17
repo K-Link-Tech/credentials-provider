@@ -1,4 +1,3 @@
-import useStore from "@/store/useStore";
 import {
   ColumnDef,
   flexRender,
@@ -7,15 +6,13 @@ import {
 } from "@tanstack/react-table";
 import { useMemo } from "react";
 
-export default function EnvironmentsTable<TData>({
+export default function EnvKeyValuesTable<TData>({
   data,
   columns,
 }: {
   data: TData[];
   columns: ColumnDef<TData, any>[];
 }) {
-  const setEnvironment = useStore((state) => state.setEnvironment);
-
   const finalData  = useMemo(()=> data, []);
   const finalColumns  = useMemo(()=> columns, []);
 
@@ -24,7 +21,7 @@ export default function EnvironmentsTable<TData>({
     columns: finalColumns,
     getCoreRowModel: getCoreRowModel(),
   });
-  console.log("environmentsData", data);
+  console.log("envKeyValuesData", data);
 
   return (
     <table className="border-collapse border-2 border-solid border-black min-w-full table-auto">
@@ -55,7 +52,6 @@ export default function EnvironmentsTable<TData>({
                 <td
                   className="px-2 py-2 text-center border-black border-b-2 border-r-2 last:border-r-0"
                   key={cell.id}
-                  onClick={() => setEnvironment(row.original as IEnvironment)}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
@@ -65,7 +61,7 @@ export default function EnvironmentsTable<TData>({
           ) : (
             <tr>
               <td colSpan={columns.length} className="h-24 text-center">
-                No environments exist.
+                No env key value pairs exist.
               </td>
             </tr>
           )}

@@ -1,6 +1,14 @@
 import type { Config } from "drizzle-kit";
  
-const connectionSecureString = "postgres://postgres:Micahsim00**@localhost:5432/credential_provider";
+import dotenv from 'dotenv';
+import config from './config';
+import path from 'path';
+
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+
+const connectionSecureString = `postgres://${config.drizzle.user}:${config.drizzle.pass}@${config.drizzle.host}:${config.server.port}/${config.drizzle.database}`;
+
+console.log("connection string:", connectionSecureString);
 
 export default {
   schema: "./src/schema",

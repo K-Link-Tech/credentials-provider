@@ -1,3 +1,4 @@
+import { REFRESH_ACCESS_URL } from "@/utils/constants";
 import axios from "axios";
 
 const api = axios.create({
@@ -11,7 +12,7 @@ api.interceptors.request.use(
     const refreshToken = localStorage.getItem("refreshToken");
     // console.log("Access Token", accessToken);
     if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken} ${refreshToken}`;
+      config.headers['Authorization'] = `Bearer ${accessToken} ${refreshToken}`;
     }
     return config;
   },
@@ -28,22 +29,22 @@ api.interceptors.response.use(
     // it means the token has expired and we need to refresh it
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-
       try {
         const refreshToken = localStorage.getItem("refreshToken");
-        const response = await api.get("/api/auth/refresh");
+        const response = await api.get(REFRESH_ACCESS_URL);
         const { accessSigningPayload } = response.data;
 
         localStorage.setItem('accessToken', accessSigningPayload);
 
         // Retry the original request with the new token
-        originalRequest.headers.Authorization = `Bearer ${accessSigningPayload} ${refreshToken}`;
-        return axios(originalRequest);
-      } catch (error) {
+        originalRequest.headers['Authorization'] = `Bearer ${accessSigningPayload} ${refreshToken}`;
+        return api(originalRequest);
+      } catch (refreshError) {
         // Handle refresh token error or redirect to login
+        localStorage.clear();
+        return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   }
 );

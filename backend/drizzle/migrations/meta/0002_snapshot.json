@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "8fc957bb-8ff6-4329-a208-1650057ef26c",
-  "prevId": "72a23ab6-7ada-458d-955d-84de691077db",
+  "id": "8c2149ce-b6f2-4d5d-92b3-9fa4d8d511b5",
+  "prevId": "b13d27b6-185b-404a-9b1b-6027ddc2415c",
   "tables": {
     "environments": {
       "name": "environments",
@@ -79,6 +79,12 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         },
         "value": {
           "name": "value",
@@ -210,7 +216,7 @@
           "name": "role",
           "type": "Roles",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "email": {
           "name": "email",
@@ -243,20 +249,6 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "users_id_unique": {
-          "name": "users_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
-        },
-        "users_name_unique": {
-          "name": "users_name_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
-        },
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
