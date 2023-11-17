@@ -216,18 +216,18 @@ const envKeyValuesColumns = [
       return row.getValue();
     },
   }),
-  // envKeyValuesColumnHelper.accessor("encryptionAlgo", {
-  //   header: () => "Project ID",
-  //   cell: (row) => {
-  //     return row.getValue();
-  //   },
-  // }),
-  envKeyValuesColumnHelper.accessor("environment_id", {
-    header: () => "Environment ID",
+  envKeyValuesColumnHelper.accessor("encryption_method", {
+    header: () => "Encryption Method",
     cell: (row) => {
       return row.getValue();
     },
   }),
+  // envKeyValuesColumnHelper.accessor("environment_id", {
+  //   header: () => "Environment ID",
+  //   cell: (row) => {
+  //     return row.getValue();
+  //   },
+  // }),
   envKeyValuesColumnHelper.accessor("createdAt", {
     header: () => "Created At",
     cell: (row) => {

@@ -8,7 +8,7 @@ import { projectColumns, userColumns } from "@/components/tables/columns";
 import ProjectsTable from "@/components/tables/ProjectsTable";
 import useStore from "@/store/useStore";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const retrieveUsers = (
   role: string,
@@ -42,13 +42,18 @@ const Dashboard: React.FC = () => {
   // const userObj: IUser = userStringObj && JSON.parse(userStringObj);
   const userObj: IUser = useStore((state) => state.user);
 
+  const navigate = useNavigate();
+
   let usersRetrieved: UseQueryResult<any, Error>;
   usersRetrieved = retrieveUsers(userObj.role, userObj.id);
   console.log("usersRetrieved: ", usersRetrieved);
 
   let projectsRetrieved: UseQueryResult<any, Error>;
   projectsRetrieved = retrieveProjects();
-  const projectsData: IProject[] = projectsRetrieved.data === undefined ? [] : projectsRetrieved.data.projectsData;
+  const projectsData: IProject[] =
+    projectsRetrieved.data === undefined
+      ? []
+      : projectsRetrieved.data.projectsData;
   console.log("projectsRetrieved: ", projectsRetrieved);
 
   if (usersRetrieved.isLoading == true || projectsRetrieved.isLoading == true) {
@@ -79,13 +84,13 @@ const Dashboard: React.FC = () => {
             columns={userColumns}
           />
         </TabsContent>
-        <TabsContent value="projects" className="flex-col flex mx-auto space-y-4">
-          <ProjectsTable
-            data={projectsData}
-            columns={projectColumns}
-          />
-          <Button>
-            <Link to="/home/proj/create">Add New Project</Link>
+        <TabsContent
+          value="projects"
+          className="flex-col flex mx-auto space-y-4"
+        >
+          <ProjectsTable data={projectsData} columns={projectColumns} />
+          <Button onClick={() => navigate("/home/proj/create")}>
+            Add New Project
           </Button>
         </TabsContent>
       </Tabs>

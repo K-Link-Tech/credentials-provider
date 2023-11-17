@@ -1,7 +1,8 @@
 import Card from "../cards/NewEnvironmentCard";
 import React from "react";
 import { Button } from "../ui/button";
-import useStore from "@/store/useStore";
+import { useParams } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 interface NewEnvironmentFormProps {
   onAddEnvironment: Function;
@@ -9,9 +10,10 @@ interface NewEnvironmentFormProps {
 
 const NewEnvironmentForm: React.FC<NewEnvironmentFormProps> = ({ onAddEnvironment }) => {
   const environmentNameInputRef: React.RefObject<HTMLInputElement> = React.createRef();
-  const project = useStore((store) => store.project);
-  const projectId = project.id;
-  console.log("ProjID: ", projectId);
+  const { projId } = useParams();
+  console.log("ProjID: ", projId);
+
+  const navigate = useNavigate();
 
   const handleAddNewEnvironment: React.FormEventHandler = (event: React.FormEvent) => {
     event.preventDefault();
@@ -19,7 +21,7 @@ const NewEnvironmentForm: React.FC<NewEnvironmentFormProps> = ({ onAddEnvironmen
 
     const environmentPayload = {
       name: enteredEnvironmentName,
-      project_id: projectId,
+      project_id: projId,
     };
     console.log("environment: ", environmentPayload);
     onAddEnvironment(environmentPayload);
@@ -27,7 +29,8 @@ const NewEnvironmentForm: React.FC<NewEnvironmentFormProps> = ({ onAddEnvironmen
 
   return (
     <Card>
-      <form className="p-1 space-y-4" onSubmit={handleAddNewEnvironment}>
+      <Button onClick={() => navigate(`/home/proj/${projId}`)}>Back</Button>
+      <form className="pt-8 space-y-4" onSubmit={handleAddNewEnvironment}>
         <div>
           <label className="text-xl font-medium" htmlFor="environmentName">Environment Name</label>
           <input

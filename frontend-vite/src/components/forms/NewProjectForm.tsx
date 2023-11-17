@@ -1,6 +1,7 @@
 import Card from "../cards/NewProjectCard";
 import React from "react";
 import { Button } from "../ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface NewProjectFormProps {
   onAddProject: Function;
@@ -10,6 +11,8 @@ const NewProjectForm: React.FC<NewProjectFormProps> = ({ onAddProject }) => {
   const projNameInputRef: React.RefObject<HTMLInputElement> = React.createRef();
   const urlInputRef: React.RefObject<HTMLInputElement> = React.createRef();
 
+  const navigate = useNavigate();
+  
   const handleAddNewProj: React.FormEventHandler = (event: React.FormEvent) => {
     event.preventDefault();
     const enteredProjName = projNameInputRef.current?.value;
@@ -25,7 +28,8 @@ const NewProjectForm: React.FC<NewProjectFormProps> = ({ onAddProject }) => {
 
   return (
     <Card>
-      <form className="p-1 space-y-4" onSubmit={handleAddNewProj}>
+      <Button onClick={() => navigate("/home")}>Back</Button>
+      <form className="pt-8 space-y-4" onSubmit={handleAddNewProj}>
         <div>
           <label className="text-xl font-medium" htmlFor="projName">Project Name</label>
           <input

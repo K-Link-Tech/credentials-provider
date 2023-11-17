@@ -60,6 +60,33 @@ router.get(
   })
 );
 
+// get env_key_values by environment id
+router.get(
+  '/:id',
+  routerEncloseAuthentication(authenticateToken, (req: Request) => {
+    const accessToken: string | undefined = req.headers.authorization?.split(' ')[1];
+    const refreshToken: string | undefined = req.headers.authorization?.split(' ')[2];
+    return {
+      source: "express",
+      payload: {
+        accessToken: accessToken,
+        refreshToken: refreshToken
+      }
+    }
+  }),
+  routerEnclose(handler.getEnvKeyValues, (req: Request) => {
+    const params = req.params.id;
+    const data = req.body as PayloadWithData;
+    return {
+      source: "express",
+      payload: {
+        id: params,
+        data: data
+      }
+    }
+  })
+);
+
 // delete one env_key_values
 router.delete(
   '/:id',

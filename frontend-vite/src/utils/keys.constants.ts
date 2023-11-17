@@ -9,6 +9,9 @@ export const QUERY_KEY = {
 export const usersQuery = {
   key: (id: string): ['users', string] => ['users', id],
 }
+export const projectsQuery = {
+  key: (id: string): ['projects', string] => ['projects', id],
+}
 export const environmentsQuery = {
   key: (id: string): ['environments', string] => ['environments', id],
 }

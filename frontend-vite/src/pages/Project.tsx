@@ -1,12 +1,12 @@
 import { getEnvironment } from "@/api/environments";
+import { getProject } from "@/api/projects";
 import EnvironmentsTable from "@/components/tables/EnvironmentsTable";
 import { environmentColumns } from "@/components/tables/columns";
 import { Button } from "@/components/ui/button";
-import useStore from "@/store/useStore";
-import { environmentsQuery } from "@/utils/keys.constants";
+import { environmentsQuery, projectsQuery } from "@/utils/keys.constants";
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const retrieveEnvironments = (id: string): UseQueryResult<any, Error> => {
   let environmentQueryObj: UseQueryResult<any, Error>;
@@ -17,9 +17,33 @@ const retrieveEnvironments = (id: string): UseQueryResult<any, Error> => {
   return environmentQueryObj;
 };
 
+const retrieveProject = (id: string): UseQueryResult<any, Error> => {
+  let projectQueryObj: UseQueryResult<any, Error>;
+  projectQueryObj = useQuery({
+    queryKey: projectsQuery.key(id),
+    queryFn: () => getProject(id),
+  });
+  return projectQueryObj;
+};
+
 const Project: React.FC = () => {
   const { projId } = useParams();
-  const projObj: IProject = useStore((state) => state.project);
+  const retrieveProjectQueryObj: UseQueryResult<any, Error> = retrieveProject(
+    projId as string
+  );
+  console.log("queryProjObj: ", retrieveProjectQueryObj);
+
+  const projQueryObj = retrieveProjectQueryObj.data;
+  console.log("projObj: ", projQueryObj);
+
+  const navigate = useNavigate();
+
+  const handleOnClickButton: React.MouseEventHandler = (
+    event: React.MouseEvent
+  ) => {
+    event.preventDefault();
+    navigate(`/home/proj/${projId}/env/create`);
+  };
 
   let environmentsRetrieved: UseQueryResult<any, Error>;
   let environmentsData: IEnvironment[] = [];
@@ -43,23 +67,15 @@ const Project: React.FC = () => {
   }
 
   return (
-    <section className="py-10 rounded-xl justify-center space-y-5 bg-white align-element">
+    <section className="py-10 rounded-xl justify-center space-y-4 bg-white align-element">
+      <Button onClick={() => navigate("/home")}>Back</Button>
       <div className="border-b border-black pb-4">
         <h2 className="text-3xl font-medium text-center">
-          Project {projObj.name} Environments
+          Project {projQueryObj.projectsData[0].name} Environments
         </h2>
       </div>
-      <div>
-        <EnvironmentsTable
-          data={environmentsData}
-          columns={environmentColumns}
-        />
-      </div>
-      <div>
-        <Button>
-          <Link to="/home/env/create">Add New Environment</Link>
-        </Button>
-      </div>
+      <EnvironmentsTable data={environmentsData} columns={environmentColumns} />
+      <Button className="w-full" onClick={handleOnClickButton}>Add New Environment</Button>
     </section>
   );
 };

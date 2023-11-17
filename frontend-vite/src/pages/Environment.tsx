@@ -23,7 +23,10 @@ const Environment: React.FC = () => {
   let envKeyValuesData: IEnvKeyValue[] = [];
   if (environmentId) {
     envKeyValuesRetrieved = retrieveEnvKeyValues(environmentId);
-    envKeyValuesData = envKeyValuesRetrieved.data === undefined ? [] : envKeyValuesRetrieved.data.environmentData;
+    if (envKeyValuesRetrieved.data !== undefined) {
+      const queriedEnvKeyValuesData = envKeyValuesRetrieved.data;
+      envKeyValuesData = queriedEnvKeyValuesData.envKeyValueData;
+    }
     console.log("envKeyValuesRetrieved: ", envKeyValuesRetrieved);
   } else {
     throw new Error("Cannot find environment ID to get environments!");

@@ -16,8 +16,8 @@ export default function ProjectsTable<TData>({
 }) {
   const setProj = useStore((state) => state.setProject);
 
-  const finalData  = useMemo(()=> data, []);
-  const finalColumns  = useMemo(()=> columns, []);
+  const finalData  = useMemo(()=> data, [data]);
+  const finalColumns  = useMemo(()=> columns, [columns]);
 
   const table = useReactTable({
     data: finalData,

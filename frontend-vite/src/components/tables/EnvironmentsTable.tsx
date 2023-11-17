@@ -16,8 +16,8 @@ export default function EnvironmentsTable<TData>({
 }) {
   const setEnvironment = useStore((state) => state.setEnvironment);
 
-  const finalData  = useMemo(()=> data, []);
-  const finalColumns  = useMemo(()=> columns, []);
+  const finalData  = useMemo(()=> data, [data]);
+  const finalColumns  = useMemo(()=> columns, [columns]);
 
   const table = useReactTable({
     data: finalData,

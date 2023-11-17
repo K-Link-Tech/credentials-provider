@@ -1,21 +1,23 @@
 import { createNewEnvironment } from "@/api/environments";
 import NewEnvironmentForm from "@/components/forms/NewEnvironmentForm";
-import useStore from "@/store/useStore";
-import { useMutation } from "@tanstack/react-query";
+import { environmentsQuery } from "@/utils/keys.constants";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useErrorBoundary } from "react-error-boundary";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const NewEnvironment: React.FC = () => {
   const navigate = useNavigate();
   const { showBoundary } = useErrorBoundary();
 
-  const projectID = useStore((store) => store.project.id);
+  const { projId } = useParams();
+  const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: createNewEnvironment,
     onSuccess: (r) => {
       console.log("New Environment result: ", r);
-      navigate(`/home/proj/${projectID}`);
+      queryClient.invalidateQueries({ queryKey: environmentsQuery.key(projId as string) });
+      navigate(`/home/proj/${projId}`);
     },
     onError: (error) => {
       console.error(error);

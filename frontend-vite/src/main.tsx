@@ -44,7 +44,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <Route path="/home/proj/:projId" element={<Project />} />
               <Route path="/home/proj/create" element={<NewProject />} />
               <Route path="/home/env/:environmentId" element={<Environment />} />
-              <Route path="/home/env/create" element={<NewEnvironment />} />
+              <Route path="/home/proj/:projId/env/create" element={<NewEnvironment />} />
             </Route>
             <Route path="/login" element={<Login />} />
             <Route path="*" element={<Login />} />

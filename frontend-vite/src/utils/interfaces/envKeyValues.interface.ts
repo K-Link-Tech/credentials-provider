@@ -3,7 +3,7 @@ interface IEnvKeyValue {
   key: string;
   value: string;
   environment_id: string;
-  encryptionAlgo: string;
+  encryption_method: string;
   createdAt: string;
   updatedAt: string;
 }
