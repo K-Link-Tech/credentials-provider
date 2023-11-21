@@ -10,11 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import moment from "moment";
-import { Link, useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteProject } from "@/api/projects";
-import { useErrorBoundary } from "react-error-boundary";
-import { QUERY_KEY } from "@/utils/keys.constants";
+import { Link } from "react-router-dom";
+
 
 
 const userColumnHelper = createColumnHelper<IUser>();
@@ -134,36 +131,6 @@ const projectColumns = [
       return row.getValue();
     },
   }),
-  // projectColumnHelper.display({
-  //   id: "actions",
-  //   cell: ({ row }) => {
-  //     const project = row.original;
-
-  //     return (
-  //       <DropdownMenu>
-  //         <DropdownMenuTrigger asChild>
-  //           <Button variant="ghost" className="h-8 w-8 p-0">
-  //             <span className="sr-only">Open menu</span>
-  //             <MoreHorizontal className="h-4 w-4" />
-  //           </Button>
-  //         </DropdownMenuTrigger>
-  //         <DropdownMenuContent align="end">
-  //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-  //           <DropdownMenuItem
-  //             onClick={() => navigator.clipboard.writeText(project.id)}
-  //           >
-  //             Copy project ID
-  //           </DropdownMenuItem>
-  //           <DropdownMenuItem
-  //             onClick={() => deleteProjectMutation.mutate(project.id)}
-  //           >
-  //             Delete Project
-  //           </DropdownMenuItem>
-  //         </DropdownMenuContent>
-  //       </DropdownMenu>
-  //     );
-  //   },
-  // }),
 ];
 
 const environmentColumnHelper = createColumnHelper<IEnvironment>();

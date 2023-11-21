@@ -3,8 +3,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import {
   ColumnDef,
   flexRender,
@@ -14,10 +15,10 @@ import {
 import { useMemo } from "react";
 import { Button } from "../ui/button";
 import { MoreHorizontal } from "lucide-react";
-import { useNavigate } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteProject } from "@/api/projects";
 import { QUERY_KEY } from "@/utils/keys.constants";
+import { useErrorBoundary } from "react-error-boundary";
 
 export default function ProjectsTable<TData>({
   data,
@@ -26,12 +27,23 @@ export default function ProjectsTable<TData>({
   data: TData[];
   columns: ColumnDef<TData, any>[];
 }) {
-  const navigate = useNavigate();
-
   const queryClient = useQueryClient();
+  const { showBoundary } = useErrorBoundary();
 
   const finalData = useMemo(() => data, [data]);
   const finalColumns = useMemo(() => columns, [columns]);
+  
+  const deleteProjectMutation = useMutation({
+    mutationFn: deleteProject,
+    onSuccess: (r) => {
+      console.log("Deleted project: ", r);
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY.projects });
+    },
+    onError: (error) => {
+      console.error(error);
+      showBoundary(error);
+    },
+  });
 
   const table = useReactTable({
     data: finalData,
@@ -39,17 +51,6 @@ export default function ProjectsTable<TData>({
     getCoreRowModel: getCoreRowModel(),
   });
   console.log("projectsData", data);
-
-  const deleteProjectMutation = useMutation({
-    mutationFn: deleteProject,
-    onSuccess: (r) => {
-      console.log("New Environment result: ", r);
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY.projects });
-    },
-    onError: (error) => {
-      console.error(error);
-    },
-  });
 
   return (
     <table className="border-collapse border-2 border-solid border-black min-w-full table-auto">
@@ -86,11 +87,32 @@ export default function ProjectsTable<TData>({
               ))}
               {/* Action Column */}
               <td className="px-2 py-2 text-center border-black border-b-2 border-r-2 last:border-r-0 border-t-2">
-                <Button
-                  onClick={() => deleteProjectMutation.mutate(row.original?.id)}
-                >
-                  Delete Project
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        navigator.clipboard.writeText(row.original?.id)
+                      }
+                    >
+                      Copy project ID
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() =>
+                        deleteProjectMutation.mutate(row.original?.id)
+                      }
+                    >
+                      Delete project
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </td>
             </tr>
           ))

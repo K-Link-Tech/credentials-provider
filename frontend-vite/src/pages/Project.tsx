@@ -75,7 +75,7 @@ const Project: React.FC = () => {
           Project {projectsData[0].name} Environments
         </h2>
       </div>
-      <EnvironmentsTable data={environmentsData} columns={environmentColumns} />
+      <EnvironmentsTable data={environmentsData} columns={environmentColumns} projectId={projId} />
       <Button className="w-full" onClick={handleOnClickButton}>
         Add New Environment
       </Button>
