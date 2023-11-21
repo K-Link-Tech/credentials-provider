@@ -1,9 +1,9 @@
-import NewProjectForm from "@/components/forms/NewProjectForm";
-import { QUERY_KEY } from "@/utils/keys.constants";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useErrorBoundary } from "react-error-boundary";
 import { useNavigate } from "react-router-dom";
 import { createNewProject } from "@/api/projects";
+import { QUERY_KEY } from "@/utils/keys.constants";
+import { useErrorBoundary } from "react-error-boundary";
+import NewProjectForm from "@/components/forms/NewProjectForm";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const NewProject: React.FC = () => {
   

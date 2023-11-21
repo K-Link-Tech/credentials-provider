@@ -16,5 +16,6 @@ export const CREATE_NEW_ENVIRONMENT_URL = `${BACKEND_API}/api/envs/create`;
 export const ALL_ENVIRONMENTS_URL = `${BACKEND_API}/api/envs/`;
 export const ONE_ENVIRONMENT_URL = `${BACKEND_API}/api/envs`;
 
+export const CREATE_NEW_ENV_KEY_VALUES_URL = `${BACKEND_API}/api/envkeys/create`;
 export const ALL_ENV_KEY_VALUES_URL = `${BACKEND_API}/api/envkeys/`;
 export const ONE_ENV_KEY_VALUES_URL = `${BACKEND_API}/api/envkeys`;

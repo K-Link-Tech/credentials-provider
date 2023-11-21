@@ -2,10 +2,8 @@ interface INewEnvironment {
   name: string;
   project_id: string;
 }
-interface IEnvironment {
+interface IEnvironment extends INewEnvironment{
   id: string;
-  name: string;
-  project_id: string;
   createdAt: string;
   updatedAt: string;
 }

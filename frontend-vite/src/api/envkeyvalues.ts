@@ -1,5 +1,10 @@
-import { ALL_ENV_KEY_VALUES_URL, ONE_ENV_KEY_VALUES_URL } from "@/utils/constants";
+import { ALL_ENV_KEY_VALUES_URL, CREATE_NEW_ENV_KEY_VALUES_URL, ONE_ENV_KEY_VALUES_URL } from "@/utils/constants";
 import api from "./axios";
+
+const createNewEnvKeyValue = async (environmentPayload: INewEnvKeyValue) => {
+  const r = await api.post(CREATE_NEW_ENV_KEY_VALUES_URL, environmentPayload);
+  return r.data;
+}
 
 const getAllEnvKeyValues = async () => {
   const r = await api.get(ALL_ENV_KEY_VALUES_URL);
@@ -27,7 +32,8 @@ const updateEnvKeyValue = async (id: string) => {
 }
 
 export {
-  getAllEnvKeyValues as getAllEnvKeyValues,
+  createNewEnvKeyValue,
+  getAllEnvKeyValues,
   getEnvKeyValue,
   deleteAllEnvKeyValues,
   deleteEnvKeyValue,

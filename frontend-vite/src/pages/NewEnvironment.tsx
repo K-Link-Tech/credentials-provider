@@ -1,9 +1,9 @@
+import { useErrorBoundary } from "react-error-boundary";
 import { createNewEnvironment } from "@/api/environments";
-import NewEnvironmentForm from "@/components/forms/NewEnvironmentForm";
+import { useNavigate, useParams } from "react-router-dom";
 import { environmentsQuery } from "@/utils/keys.constants";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useErrorBoundary } from "react-error-boundary";
-import { useNavigate, useParams } from "react-router-dom";
+import NewEnvironmentForm from "@/components/forms/NewEnvironmentForm";
 
 const NewEnvironment: React.FC = () => {
   const navigate = useNavigate();

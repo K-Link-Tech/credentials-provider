@@ -4,7 +4,6 @@ import EnvironmentsTable from "@/components/tables/EnvironmentsTable";
 import { environmentColumns } from "@/components/tables/columns";
 import { Button } from "@/components/ui/button";
 import { environmentsQuery, projectsQuery } from "@/utils/keys.constants";
-
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +27,6 @@ const retrieveProject = (id: string): UseQueryResult<any, Error> => {
 
 const Project: React.FC = () => {
   const { projId } = useParams();
-
   const navigate = useNavigate();
 
   const handleOnClickButton: React.MouseEventHandler = (
@@ -42,6 +40,7 @@ const Project: React.FC = () => {
   let environmentsRetrieved: UseQueryResult<any, Error>;
   let environmentsData: IEnvironment[] = [];
   let projectsData: IProject[] = [];
+
   if (projId) {
     retrieveProjectQueryObj = retrieveProject(projId);
     if (retrieveProjectQueryObj.data !== undefined) {
@@ -59,7 +58,7 @@ const Project: React.FC = () => {
     throw new Error("Cannot find project ID to get environments!");
   }
 
-  if (environmentsRetrieved.isLoading == true) {
+  if (environmentsRetrieved.isLoading == true || retrieveProjectQueryObj.isLoading) {
     return (
       <section className="flex items-center justify-center mx-auto my-auto">
         <p className="text-8xl text-white font-bold">Loading...</p>
@@ -75,7 +74,11 @@ const Project: React.FC = () => {
           Project {projectsData[0].name} Environments
         </h2>
       </div>
-      <EnvironmentsTable data={environmentsData} columns={environmentColumns} projectId={projId} />
+      <EnvironmentsTable
+        data={environmentsData}
+        columns={environmentColumns}
+        projectId={projId}
+      />
       <Button className="w-full" onClick={handleOnClickButton}>
         Add New Environment
       </Button>

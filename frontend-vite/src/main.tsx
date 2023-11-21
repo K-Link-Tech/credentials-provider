@@ -17,6 +17,7 @@ import Project from "./pages/Project.tsx";
 import NewProject from "./pages/NewProject.tsx";
 import Environment from "./pages/Environment.tsx";
 import NewEnvironment from "./pages/NewEnvironment.tsx";
+import NewEnvKeyValue from "./pages/NewEnvKeyValue.tsx";
 
 const config: QueryClientConfig = {
   defaultOptions: {
@@ -45,6 +46,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <Route path="/home/proj/create" element={<NewProject />} />
               <Route path="/home/env/:environmentId" element={<Environment />} />
               <Route path="/home/proj/:projId/env/create" element={<NewEnvironment />} />
+              <Route path="/home/env/:environmentId/envkeys/create" element={<NewEnvKeyValue />} />
             </Route>
             <Route path="/login" element={<Login />} />
             <Route path="*" element={<Login />} />
