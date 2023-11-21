@@ -1,4 +1,10 @@
-import useStore from "@/store/useStore";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
 import {
   ColumnDef,
   flexRender,
@@ -6,6 +12,12 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
+import { Button } from "../ui/button";
+import { MoreHorizontal } from "lucide-react";
+import { useNavigate } from "react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteProject } from "@/api/projects";
+import { QUERY_KEY } from "@/utils/keys.constants";
 
 export default function ProjectsTable<TData>({
   data,
@@ -14,10 +26,12 @@ export default function ProjectsTable<TData>({
   data: TData[];
   columns: ColumnDef<TData, any>[];
 }) {
-  const setProj = useStore((state) => state.setProject);
+  const navigate = useNavigate();
 
-  const finalData  = useMemo(()=> data, [data]);
-  const finalColumns  = useMemo(()=> columns, [columns]);
+  const queryClient = useQueryClient();
+
+  const finalData = useMemo(() => data, [data]);
+  const finalColumns = useMemo(() => columns, [columns]);
 
   const table = useReactTable({
     data: finalData,
@@ -26,6 +40,17 @@ export default function ProjectsTable<TData>({
   });
   console.log("projectsData", data);
 
+  const deleteProjectMutation = useMutation({
+    mutationFn: deleteProject,
+    onSuccess: (r) => {
+      console.log("New Environment result: ", r);
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY.projects });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
   return (
     <table className="border-collapse border-2 border-solid border-black min-w-full table-auto">
       <thead>
@@ -33,7 +58,7 @@ export default function ProjectsTable<TData>({
           <tr key={headerGroup.id}>
             {headerGroup.headers.map((header) => (
               <th
-                className="px-1 py-1 border-b-2 border-b-gray-500 border-r-2 border-r-gray-500 last:border-r-0"
+                className="px-1 py-1 border-b-2 border-b-gray-500 border-r-2 border-r-gray-500 last:border-r-2"
                 key={header.id}
               >
                 {header.isPlaceholder
@@ -48,27 +73,34 @@ export default function ProjectsTable<TData>({
         ))}
       </thead>
       <tbody>
-      {table.getRowModel().rows?.length ? (
+        {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row) => (
             <tr key={row.id}>
               {row.getVisibleCells().map((cell) => (
                 <td
                   className="px-2 py-2 text-center border-black border-b-2 border-r-2 last:border-r-0"
                   key={cell.id}
-                  onClick={() => setProj(row.original as IProject)}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
-            </tr>
-          ))
-          ) : (
-            <tr>
-              <td colSpan={columns.length} className="h-24 text-center">
-                No projects exist.
+              {/* Action Column */}
+              <td className="px-2 py-2 text-center border-black border-b-2 border-r-2 last:border-r-0 border-t-2">
+                <Button
+                  onClick={() => deleteProjectMutation.mutate(row.original?.id)}
+                >
+                  Delete Project
+                </Button>
               </td>
             </tr>
-          )}
+          ))
+        ) : (
+          <tr>
+            <td colSpan={columns.length} className="h-24 text-center">
+              No projects exist.
+            </td>
+          </tr>
+        )}
       </tbody>
     </table>
   );

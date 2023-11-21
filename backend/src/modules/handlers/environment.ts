@@ -7,7 +7,7 @@ import {
 } from '../../utils/errorTypes';
 import { environments } from '../../schema/environments.schema';
 import { logs } from '../../schema/logs.schema';
-import { and, eq, sql, like } from 'drizzle-orm';
+import { and, eq, sql, like, or } from 'drizzle-orm';
 import { PayloadWithData, PayloadWithIdData, PayloadWithIdDataBody, PayloadWithNameProjectIdData, UpdateEnvReqBody } from '../interfaces/environmentRequest.interface';
 
 const NAMESPACE = 'Environment-route';
@@ -129,7 +129,7 @@ const getEnvironments: eventHandler = async (event) => {
         : await db
           .select()
           .from(environments)
-          .where(sql`${environments.project_id} = ${id}`)
+          .where(or(sql`${environments.project_id} = ${id}`, sql `${environments.id} = ${id}`))
           .catch((error) => {
             logging.error(NAMESPACE, getErrorMessage(error), error);
             const e = new DatabaseRequestError(

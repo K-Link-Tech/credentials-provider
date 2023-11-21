@@ -4,6 +4,7 @@ import EnvironmentsTable from "@/components/tables/EnvironmentsTable";
 import { environmentColumns } from "@/components/tables/columns";
 import { Button } from "@/components/ui/button";
 import { environmentsQuery, projectsQuery } from "@/utils/keys.constants";
+
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import { useNavigate } from "react-router-dom";
@@ -16,7 +17,6 @@ const retrieveEnvironments = (id: string): UseQueryResult<any, Error> => {
   });
   return environmentQueryObj;
 };
-
 const retrieveProject = (id: string): UseQueryResult<any, Error> => {
   let projectQueryObj: UseQueryResult<any, Error>;
   projectQueryObj = useQuery({
@@ -28,13 +28,6 @@ const retrieveProject = (id: string): UseQueryResult<any, Error> => {
 
 const Project: React.FC = () => {
   const { projId } = useParams();
-  const retrieveProjectQueryObj: UseQueryResult<any, Error> = retrieveProject(
-    projId as string
-  );
-  console.log("queryProjObj: ", retrieveProjectQueryObj);
-
-  const projQueryObj = retrieveProjectQueryObj.data;
-  console.log("projObj: ", projQueryObj);
 
   const navigate = useNavigate();
 
@@ -45,9 +38,17 @@ const Project: React.FC = () => {
     navigate(`/home/proj/${projId}/env/create`);
   };
 
+  let retrieveProjectQueryObj: UseQueryResult<any, Error>;
   let environmentsRetrieved: UseQueryResult<any, Error>;
   let environmentsData: IEnvironment[] = [];
+  let projectsData: IProject[] = [];
   if (projId) {
+    retrieveProjectQueryObj = retrieveProject(projId);
+    if (retrieveProjectQueryObj.data !== undefined) {
+      const queriedProjectData = retrieveProjectQueryObj.data;
+      projectsData = queriedProjectData.projectsData;
+    }
+
     environmentsRetrieved = retrieveEnvironments(projId);
     environmentsData =
       environmentsRetrieved.data === undefined
@@ -71,11 +72,13 @@ const Project: React.FC = () => {
       <Button onClick={() => navigate("/home")}>Back</Button>
       <div className="border-b border-black pb-4">
         <h2 className="text-3xl font-medium text-center">
-          Project {projQueryObj.projectsData[0].name} Environments
+          Project {projectsData[0].name} Environments
         </h2>
       </div>
       <EnvironmentsTable data={environmentsData} columns={environmentColumns} />
-      <Button className="w-full" onClick={handleOnClickButton}>Add New Environment</Button>
+      <Button className="w-full" onClick={handleOnClickButton}>
+        Add New Environment
+      </Button>
     </section>
   );
 };

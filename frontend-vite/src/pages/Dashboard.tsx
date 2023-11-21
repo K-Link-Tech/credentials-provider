@@ -1,14 +1,14 @@
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
-import { QUERY_KEY, usersQuery } from "@/utils/keys.constants";
-import { getAllUsers, getUser } from "@/api/users";
 import UsersTable from "@/components/tables/UsersTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getAllProjects } from "@/api/projects";
 import { projectColumns, userColumns } from "@/components/tables/columns";
 import ProjectsTable from "@/components/tables/ProjectsTable";
 import useStore from "@/store/useStore";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { getAllUsers, getUser } from "@/api/users";
+import { QUERY_KEY, usersQuery } from "@/utils/keys.constants";
+import { getAllProjects } from "@/api/projects";
 
 const retrieveUsers = (
   role: string,
@@ -38,8 +38,6 @@ const retrieveProjects = (): UseQueryResult<any, Error> => {
 };
 
 const Dashboard: React.FC = () => {
-  // const userStringObj = localStorage.getItem("user");
-  // const userObj: IUser = userStringObj && JSON.parse(userStringObj);
   const userObj: IUser = useStore((state) => state.user);
 
   const navigate = useNavigate();
@@ -47,6 +45,8 @@ const Dashboard: React.FC = () => {
   let usersRetrieved: UseQueryResult<any, Error>;
   usersRetrieved = retrieveUsers(userObj.role, userObj.id);
   console.log("usersRetrieved: ", usersRetrieved);
+  const userData: IUser[] =
+    usersRetrieved.data === undefined ? [] : usersRetrieved.data.usersData;
 
   let projectsRetrieved: UseQueryResult<any, Error>;
   projectsRetrieved = retrieveProjects();
@@ -79,10 +79,7 @@ const Dashboard: React.FC = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="users">
-          <UsersTable
-            data={usersRetrieved.data.usersData}
-            columns={userColumns}
-          />
+          <UsersTable data={userData} columns={userColumns} />
         </TabsContent>
         <TabsContent
           value="projects"

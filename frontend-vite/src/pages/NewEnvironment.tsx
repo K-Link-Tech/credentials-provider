@@ -8,11 +8,12 @@ import { useNavigate, useParams } from "react-router-dom";
 const NewEnvironment: React.FC = () => {
   const navigate = useNavigate();
   const { showBoundary } = useErrorBoundary();
-
-  const { projId } = useParams();
+  
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  const { projId } = useParams();
+
+  const createEnvironment = useMutation({
     mutationFn: createNewEnvironment,
     onSuccess: (r) => {
       console.log("New Environment result: ", r);
@@ -27,7 +28,7 @@ const NewEnvironment: React.FC = () => {
 
   const addEnvironmentHandler = async (environmentData: INewEnvironment) => {
     console.log("posting backend...");
-    mutation.mutate(environmentData);
+    createEnvironment.mutate(environmentData);
   };
 
   return (

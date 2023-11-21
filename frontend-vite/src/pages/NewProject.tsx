@@ -1,18 +1,16 @@
-import { createNewProject } from "@/api/projects";
 import NewProjectForm from "@/components/forms/NewProjectForm";
-import { Button } from "@/components/ui/button";
 import { QUERY_KEY } from "@/utils/keys.constants";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useErrorBoundary } from "react-error-boundary";
 import { useNavigate } from "react-router-dom";
+import { createNewProject } from "@/api/projects";
 
 const NewProject: React.FC = () => {
+  
   const navigate = useNavigate();
   const { showBoundary } = useErrorBoundary();
-
   const queryClient = useQueryClient();
-
-  const mutation = useMutation({
+  const createProject = useMutation({
     mutationFn: createNewProject,
     onSuccess: (r) => {
       console.log("New Proj result: ", r);
@@ -27,7 +25,7 @@ const NewProject: React.FC = () => {
 
   const addProjectHandler = async (projectData: INewProject) => {
     console.log("posting backend...");
-    mutation.mutate(projectData);
+    createProject.mutate(projectData);
   };
 
   return (

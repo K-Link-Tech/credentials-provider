@@ -42,7 +42,7 @@ const Login: React.FC = () => {
 
       setUser(data.user);
 
-      navigate("/home");
+      navigate("/home", { replace: true });
     },
     onError: (error) => {
       console.error(error);
