@@ -17,12 +17,17 @@ const retrieveUsers = (
   id: string
 ): UseQueryResult<any, Error> => {
   let userQueryObj: UseQueryResult<any, Error>;
+  console.log("In retrieveUsers",role);
+  console.log("In retrieveUsers",id);
   if (role === "admin") {
+    console.log("UserQuery function ALL HIT role: ",role);
+    
     userQueryObj = useQuery({
       queryKey: QUERY_KEY.users,
       queryFn: getAllUsers,
     });
   } else {
+    console.log("UserQuery function ONE HIT role: ",role);
     userQueryObj = useQuery({
       queryKey: usersQuery.key(id),
       queryFn: () => getUser(id),
@@ -43,14 +48,17 @@ const Dashboard: React.FC = () => {
   const { showBoundary } = useErrorBoundary();
   const queryClient = useQueryClient();
 
-  const userObj: IUser = useStore((state) => state.user);
+  const userRole = sessionStorage.getItem("userRole") as string;
+  const userId = sessionStorage.getItem("userId") as string;
+  console.log(userRole);
+  console.log(userId);
   const projObj: IProject = useStore((state) => state.project);
   const projectModalOpen: boolean = useStore((state) => state.projectModalOpen);
 
   const navigate = useNavigate();
 
   let usersRetrieved: UseQueryResult<any, Error>;
-  usersRetrieved = retrieveUsers(userObj.role, userObj.id);
+  usersRetrieved = retrieveUsers(userRole, userId);
   console.log("usersRetrieved: ", usersRetrieved);
   const userData: IUser[] =
     usersRetrieved.data === undefined ? [] : usersRetrieved.data.usersData;
@@ -108,8 +116,7 @@ const Dashboard: React.FC = () => {
           </TabsContent>
           <TabsContent
             value="projects"
-            className="flex-col flex mx-auto space-y-4"
-          >
+            className="flex-col flex mx-auto space-y-4">
             <ProjectsTable data={projectsData} columns={projectColumns} />
             <Button onClick={() => navigate("/home/proj/create")}>
               Add New Project
