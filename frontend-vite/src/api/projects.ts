@@ -26,8 +26,8 @@ const deleteProject = async (id: string) => {
   return r.data;
 }
 
-const updateProject = async (id: string) => {
-  const r = await api.patch(`${ONE_PROJECT_URL}/${id}`);
+const updateProject = async (id: string, payload: IUpdateProject) => {
+  const r = await api.patch(`${ONE_PROJECT_URL}/${id}`, payload);
   return r.data;
 }
 

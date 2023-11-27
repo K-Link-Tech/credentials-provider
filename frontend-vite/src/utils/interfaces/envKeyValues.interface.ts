@@ -5,7 +5,7 @@ interface INewEnvKeyValue {
   environment_id: string;
 }
 
-interface IEnvKeyValue {
+interface IEnvKeyValue extends INewEnvKeyValue{
   id: string
   createdAt: string;
   updatedAt: string;

@@ -1,4 +1,4 @@
-import { UseQueryResult, useQuery } from "@tanstack/react-query";
+import { UseMutationResult, UseQueryResult, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import UsersTable from "@/components/tables/UsersTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { projectColumns, userColumns } from "@/components/tables/columns";
@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { getAllUsers, getUser } from "@/api/users";
 import { QUERY_KEY, usersQuery } from "@/utils/keys.constants";
-import { getAllProjects } from "@/api/projects";
+import { getAllProjects, updateProject } from "@/api/projects";
+import { ProjectModal } from "@/components/ProjectModal";
+import { useErrorBoundary } from "react-error-boundary";
 
 const retrieveUsers = (
   role: string,
@@ -38,7 +40,12 @@ const retrieveProjects = (): UseQueryResult<any, Error> => {
 };
 
 const Dashboard: React.FC = () => {
+  const { showBoundary } = useErrorBoundary();
+  const queryClient = useQueryClient();
+
   const userObj: IUser = useStore((state) => state.user);
+  const projObj: IProject = useStore((state) => state.project);
+  const projectModalOpen: boolean = useStore((state) => state.projectModalOpen);
 
   const navigate = useNavigate();
 
@@ -56,6 +63,23 @@ const Dashboard: React.FC = () => {
       : projectsRetrieved.data.projectsData;
   console.log("projectsRetrieved: ", projectsRetrieved);
 
+  let updateProjectMutation: UseMutationResult<any, Error, IUpdateProject, unknown>;
+  updateProjectMutation = useMutation({
+    mutationFn: (projectData: IUpdateProject) => updateProject(projObj.id, projectData),
+    onSuccess: (r) => {
+      console.log("Updated Proj result: ", r);
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY.projects })
+    },
+    onError: (error) => {
+      console.error("Update Project Error: ", error);
+      showBoundary(error);
+    }
+  });
+  const updateProjectHandler = async (projectData: IUpdateProject) => {
+    console.log("posting backend...");
+    updateProjectMutation.mutate(projectData);
+  }
+
   if (usersRetrieved.isLoading == true || projectsRetrieved.isLoading == true) {
     return (
       <section className="flex items-center justify-center mx-auto my-auto">
@@ -65,32 +89,35 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <section className="py-10 rounded-xl justify-center space-y-5 bg-white align-element">
+    <section className="py-10 rounded-xl justify-center bg-white align-element">
       <div className="border-b border-black pb-4">
         <h2 className="text-3xl font-medium text-center">Data</h2>
       </div>
-      <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="w-full justify-evenly rounded-2xl">
-          <TabsTrigger value="users" className="w-full rounded-2xl">
-            Users
-          </TabsTrigger>
-          <TabsTrigger value="projects" className="w-full rounded-2xl">
-            Projects
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="users">
-          <UsersTable data={userData} columns={userColumns} />
-        </TabsContent>
-        <TabsContent
-          value="projects"
-          className="flex-col flex mx-auto space-y-4"
-        >
-          <ProjectsTable data={projectsData} columns={projectColumns} />
-          <Button onClick={() => navigate("/home/proj/create")}>
-            Add New Project
-          </Button>
-        </TabsContent>
-      </Tabs>
+      <div  className="pt-4">
+        <Tabs defaultValue="users">
+          <TabsList className="w-full justify-evenly rounded-2xl">
+            <TabsTrigger value="users" className="w-full rounded-2xl">
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="projects" className="w-full rounded-2xl">
+              Projects
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="users">
+            <UsersTable data={userData} columns={userColumns} />
+          </TabsContent>
+          <TabsContent
+            value="projects"
+            className="flex-col flex mx-auto space-y-4"
+          >
+            <ProjectsTable data={projectsData} columns={projectColumns} />
+            <Button onClick={() => navigate("/home/proj/create")}>
+              Add New Project
+            </Button>
+          </TabsContent>
+        </Tabs>
+      </div>
+      {projectModalOpen && <ProjectModal onUpdateProject={updateProjectHandler} />}
     </section>
   );
 };

@@ -1,16 +1,10 @@
 import { createColumnHelper } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import moment from "moment";
 import { Link } from "react-router-dom";
+import { EnvKeyValuesRowActions } from "./rowActions/EnvKeyValuesRowActions";
+import { EnvironmentsRowActions } from "./rowActions/EnvironmentsRowActions";
+import { ProjectsRowActions } from "./rowActions/ProjectsRowActions";
+import { UsersRowActions } from "./rowActions/UsersRowActions";
 
 
 
@@ -64,31 +58,8 @@ const userColumns = [
     },
   }),
   userColumnHelper.display({
-    id: "actions",
-    cell: ({ row }) => {
-      const user = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user.id)}
-            >
-              Copy user ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View user details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    header: "Actions",
+    cell: ({row}) => <UsersRowActions rowId={row.original.id} />
   }),
 ];
 
@@ -131,6 +102,10 @@ const projectColumns = [
       return row.getValue();
     },
   }),
+  projectColumnHelper.display({
+    header: "Actions",
+    cell: ({row}) => <ProjectsRowActions project={row.original} rowId={row.original.id} />
+  }),
 ];
 
 const environmentColumnHelper = createColumnHelper<IEnvironment>();
@@ -170,6 +145,10 @@ const environmentColumns = [
     cell: (row) => {
       return row.getValue();
     },
+  }),
+  environmentColumnHelper.display({
+    header: "Actions",
+    cell: ({row}) => <EnvironmentsRowActions rowId={row.original.id} projectId={row.original.project_id} />
   }),
 ];
 
@@ -217,6 +196,10 @@ const envKeyValuesColumns = [
     cell: (row) => {
       return row.getValue();
     },
+  }),
+  envKeyValuesColumnHelper.display({
+    header: "Actions",
+    cell: ({row}) => <EnvKeyValuesRowActions rowId={row.original.id} environmentId={row.original.environment_id} />
   }),
 ];
 

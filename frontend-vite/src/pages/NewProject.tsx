@@ -10,6 +10,7 @@ const NewProject: React.FC = () => {
   const navigate = useNavigate();
   const { showBoundary } = useErrorBoundary();
   const queryClient = useQueryClient();
+  
   const createProject = useMutation({
     mutationFn: createNewProject,
     onSuccess: (r) => {
