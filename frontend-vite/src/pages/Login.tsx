@@ -5,6 +5,7 @@ import { LOGIN_URL } from '../utils/constants';
 import { logUserIn } from '@/api/users';
 import { useErrorBoundary } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
+import useStore from '@/store/useStore';
 
 type LoginResponseObj = {
   message: string;
@@ -28,6 +29,8 @@ interface IUserPayload {
 const Login: React.FC = () => {
   const { showBoundary } = useErrorBoundary();
   const navigate = useNavigate();
+  const setLogin = useStore((state) => state.setLogin);
+  const setUser = useStore((state) => state.setUser);
   
   const mutation = useMutation({
     mutationFn: logUserIn,
@@ -37,8 +40,8 @@ const Login: React.FC = () => {
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
       localStorage.setItem("user", JSON.stringify(data.user));
-      sessionStorage.setItem("userRole", data.user.role);
-      sessionStorage.setItem("userId", data.user.id);
+      setUser(data.user);
+      setLogin();
 
       navigate("/home", { replace: true });
     },

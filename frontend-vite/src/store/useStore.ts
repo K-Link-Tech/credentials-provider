@@ -7,12 +7,31 @@ import { createEnvironmentSlice } from "./slices/environmentSlice";
 import { IEnvironmentData } from "./interfaces/IEnvironmentData";
 import { createEnvKeyValueSlice } from "./slices/envKeyValueSlice";
 import { IEnvKeyValueData } from "./interfaces/IEnvKeyValueData";
+import { createAuthSlice } from "./slices/authSlice";
+import { IAuthData } from "./interfaces/IAuthData";
+import { persist } from 'zustand/middleware';
 
-const useStore = create<IUserData & IProjectData & IEnvironmentData & IEnvKeyValueData>()((...a)=> ({
+interface ICombinedStorage
+  extends IUserData,
+    IProjectData,
+    IEnvironmentData,
+    IEnvKeyValueData,
+    IAuthData {}
+
+const useStore = create<ICombinedStorage>()(
+  persist((...a) => ({
   ...createUserSlice(...a),
   ...createProjectSlice(...a),
   ...createEnvironmentSlice(...a),
-  ...createEnvKeyValueSlice(...a)
-}))
+  ...createEnvKeyValueSlice(...a),
+  ...createAuthSlice(...a)
+  }), {
+    name: "Auth_Store",
+    getStorage: () => localStorage,
+    partialize: (state) => ({
+      loginStatus: state.loginStatus,
+      user: state.user
+    }) 
+  }));
 
 export default useStore;

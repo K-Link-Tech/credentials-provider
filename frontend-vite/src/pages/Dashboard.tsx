@@ -48,8 +48,10 @@ const Dashboard: React.FC = () => {
   const { showBoundary } = useErrorBoundary();
   const queryClient = useQueryClient();
 
-  const userRole = sessionStorage.getItem("userRole") as string;
-  const userId = sessionStorage.getItem("userId") as string;
+  const userObj = useStore((state) => state.user);
+
+  const userRole = userObj.role as string;
+  const userId = userObj.id as string;
   const projObj: IProject = useStore((state) => state.project);
   const projectModalOpen: boolean = useStore((state) => state.projectModalOpen);
 
