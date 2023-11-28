@@ -55,18 +55,18 @@ export const ProjectsRowActions: React.FC<RowActionsProps> = (props) => {
         <DropdownMenuItem
           onClick={() => navigator.clipboard.writeText(props.rowId)}
         >
-          Copy project ID
+          Copy Project ID
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => deleteProjectMutation.mutate(props.rowId)}
         >
-          Delete project
+          Delete Project
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleOnClickUpdate}
         >
-          Edit project
+          Edit Project
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

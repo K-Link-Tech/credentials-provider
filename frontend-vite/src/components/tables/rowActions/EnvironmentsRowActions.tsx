@@ -5,15 +5,19 @@ import { environmentsQuery } from "@/utils/keys.constants";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useErrorBoundary } from "react-error-boundary";
 import { deleteEnvironment } from "@/api/environments";
+import useStore from "@/store/useStore";
 
 interface RowActionsProps {
   projectId: string,
+  environment: IEnvironment,
   rowId: string
 }
 
 export const EnvironmentsRowActions: React.FC<RowActionsProps> = (props) => {
   const queryClient = useQueryClient();
   const { showBoundary } = useErrorBoundary();
+  const setModal = useStore((state) => state.setEnvironmentModalOpen);
+  const setEnvironment = useStore((state) => state.setEnvironment);
   
   const deleteEnvironmentMutation = useMutation({
     mutationFn: deleteEnvironment,
@@ -26,6 +30,11 @@ export const EnvironmentsRowActions: React.FC<RowActionsProps> = (props) => {
       showBoundary(error);
     },
   });
+
+  const handleOnClickUpdate = () => {
+    setModal(true);
+    setEnvironment(props.environment);
+  }
 
   return (
     <DropdownMenu>
@@ -40,13 +49,18 @@ export const EnvironmentsRowActions: React.FC<RowActionsProps> = (props) => {
         <DropdownMenuItem
           onClick={() => navigator.clipboard.writeText(props.rowId)}
         >
-          Copy Env Key Value pair ID
+          Copy Environment ID
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => deleteEnvironmentMutation.mutate(props.rowId)}
         >
-          Delete Env Key Value pair
+          Delete Environment
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleOnClickUpdate}
+        >
+          Edit Environment
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

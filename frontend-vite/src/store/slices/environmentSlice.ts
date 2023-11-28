@@ -9,7 +9,12 @@ const createEnvironmentSlice: StateCreator<IEnvironmentData> = (set) => ({
     createdAt: "",
     updatedAt: ""
   },
-  setEnvironment: (environmentObj: IEnvironment) => set((state: IEnvironmentData) => ({...state, environment: environmentObj}))
+  setEnvironment: (environmentObj: IEnvironment) => set((state: IEnvironmentData) => ({...state, environment: environmentObj})),
+  environmentModalOpen: false,
+  setEnvironmentModalOpen: (value: boolean) => set(() => ({ environmentModalOpen: value})),
+  environmentModalError: "",
+  setEnvironmentModalError: (value: string) => set(() => ({ environmentModalError: value })),
+  clearEnvironmentModalError: () => set(() => ({ environmentModalError: "" }))
 });
 
 export {

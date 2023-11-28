@@ -26,8 +26,8 @@ const deleteEnvKeyValue = async (id: string) => {
   return r.data;
 }
 
-const updateEnvKeyValue = async (id: string) => {
-  const r = await api.patch(`${ONE_ENV_KEY_VALUES_URL}/${id}`);
+const updateEnvKeyValue = async (id: string, payload: IUpdateEnvKeyValue) => {
+  const r = await api.patch(`${ONE_ENV_KEY_VALUES_URL}/${id}`, payload);
   return r.data;
 }
 

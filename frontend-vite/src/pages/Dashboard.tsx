@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { getAllUsers, getUser } from "@/api/users";
 import { QUERY_KEY, usersQuery } from "@/utils/keys.constants";
 import { getAllProjects, updateProject } from "@/api/projects";
-import { ProjectModal } from "@/components/ProjectModal";
+import { ProjectModal } from "@/components/modals/ProjectModal";
 import { useErrorBoundary } from "react-error-boundary";
 
 const retrieveUsers = (
@@ -17,8 +17,8 @@ const retrieveUsers = (
   id: string
 ): UseQueryResult<any, Error> => {
   let userQueryObj: UseQueryResult<any, Error>;
-  console.log("In retrieveUsers",role);
-  console.log("In retrieveUsers",id);
+  // console.log("In retrieveUsers",role);
+  // console.log("In retrieveUsers",id);
   if (role === "admin") {
     console.log("UserQuery function ALL HIT role: ",role);
     
@@ -50,8 +50,6 @@ const Dashboard: React.FC = () => {
 
   const userRole = sessionStorage.getItem("userRole") as string;
   const userId = sessionStorage.getItem("userId") as string;
-  console.log(userRole);
-  console.log(userId);
   const projObj: IProject = useStore((state) => state.project);
   const projectModalOpen: boolean = useStore((state) => state.projectModalOpen);
 
@@ -86,7 +84,7 @@ const Dashboard: React.FC = () => {
   const updateProjectHandler = async (projectData: IUpdateProject) => {
     console.log("posting backend...");
     updateProjectMutation.mutate(projectData);
-  }
+  };
 
   if (usersRetrieved.isLoading == true || projectsRetrieved.isLoading == true) {
     return (

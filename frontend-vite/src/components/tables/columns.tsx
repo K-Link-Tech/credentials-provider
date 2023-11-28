@@ -6,8 +6,6 @@ import { EnvironmentsRowActions } from "./rowActions/EnvironmentsRowActions";
 import { ProjectsRowActions } from "./rowActions/ProjectsRowActions";
 import { UsersRowActions } from "./rowActions/UsersRowActions";
 
-
-
 const userColumnHelper = createColumnHelper<IUser>();
 
 const userColumns = [
@@ -59,12 +57,11 @@ const userColumns = [
   }),
   userColumnHelper.display({
     header: "Actions",
-    cell: ({row}) => <UsersRowActions rowId={row.original.id} />
+    cell: ({ row }) => <UsersRowActions rowId={row.original.id} />,
   }),
 ];
 
 const projectColumnHelper = createColumnHelper<IProject>();
-
 
 const projectColumns = [
   // columnHelper.accessor("id", {
@@ -104,7 +101,9 @@ const projectColumns = [
   }),
   projectColumnHelper.display({
     header: "Actions",
-    cell: ({row}) => <ProjectsRowActions project={row.original} rowId={row.original.id} />
+    cell: ({ row }) => (
+      <ProjectsRowActions project={row.original} rowId={row.original.id} />
+    ),
   }),
 ];
 
@@ -148,7 +147,13 @@ const environmentColumns = [
   }),
   environmentColumnHelper.display({
     header: "Actions",
-    cell: ({row}) => <EnvironmentsRowActions rowId={row.original.id} projectId={row.original.project_id} />
+    cell: ({ row }) => (
+      <EnvironmentsRowActions
+        environment={row.original}
+        rowId={row.original.id}
+        projectId={row.original.project_id}
+      />
+    ),
   }),
 ];
 
@@ -199,9 +204,14 @@ const envKeyValuesColumns = [
   }),
   envKeyValuesColumnHelper.display({
     header: "Actions",
-    cell: ({row}) => <EnvKeyValuesRowActions rowId={row.original.id} environmentId={row.original.environment_id} />
+    cell: ({ row }) => (
+      <EnvKeyValuesRowActions
+        rowId={row.original.id}
+        envKeyValue={row.original}
+        environmentId={row.original.environment_id}
+      />
+    ),
   }),
 ];
-
 
 export { userColumns, projectColumns, environmentColumns, envKeyValuesColumns };

@@ -27,8 +27,8 @@ const deleteEnvironment = async (id: string) => {
   return r.data;
 }
 
-const updateEnvironment = async (id: string) => {
-  const r = await api.patch(`${ONE_ENVIRONMENT_URL}/${id}`);
+const updateEnvironment = async (id: string, payload: IUpdateEnvironment) => {
+  const r = await api.patch(`${ONE_ENVIRONMENT_URL}/${id}`, payload);
   return r.data;
 }
 

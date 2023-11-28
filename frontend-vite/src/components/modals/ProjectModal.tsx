@@ -1,5 +1,5 @@
 import useStore from "@/store/useStore";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import React from "react";
 
 interface UpdateProjectProps {
@@ -37,7 +37,7 @@ export const ProjectModal: React.FC<UpdateProjectProps> = ({ onUpdateProject }) 
       }
       setModal(false);
     } else {
-      setModalError("Required: Please key in either name or url to update.")
+      setModalError("Required: Please key in either Name or Url to update.")
       // alert("At least 1 field is required!");
     }    
   }
@@ -61,7 +61,7 @@ export const ProjectModal: React.FC<UpdateProjectProps> = ({ onUpdateProject }) 
             <input
               className="rounded-md border-black p-2 text-base"
               id="name"
-              placeholder="Enter your new project name"
+              placeholder="Enter your new Project Name"
               defaultValue={projObj.name}
               type="text"
               onChange={clearModalError}
@@ -75,7 +75,7 @@ export const ProjectModal: React.FC<UpdateProjectProps> = ({ onUpdateProject }) 
             <input
               className="rounded-md border-black p-2 text-base"
               id="url"
-              placeholder="Enter your new project url"
+              placeholder="Enter your new Project Url"
               defaultValue={projObj.url}
               type="url"
               onChange={clearModalError}

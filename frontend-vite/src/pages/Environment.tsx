@@ -1,10 +1,13 @@
 import { getEnvironment } from "@/api/environments";
-import { getEnvKeyValue } from "@/api/envkeyvalues";
+import { getEnvKeyValue, updateEnvKeyValue } from "@/api/envkeyvalues";
+import { EnvKeyValueModal } from "@/components/modals/EnvKeyValueModal";
 import EnvKeyValuesTable from "@/components/tables/EnvKeyValuesTable";
 import { envKeyValuesColumns } from "@/components/tables/columns";
 import { Button } from "@/components/ui/button";
+import useStore from "@/store/useStore";
 import { envKeyValuesQuery, environmentsQuery } from "@/utils/keys.constants";
-import { UseQueryResult, useQuery } from "@tanstack/react-query";
+import { UseMutationResult, UseQueryResult, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useErrorBoundary } from "react-error-boundary";
 import { useParams } from "react-router";
 import { useNavigate } from "react-router-dom";
 
@@ -29,6 +32,12 @@ const retrieveEnvironment = (id: string): UseQueryResult<any, Error> => {
 const Environment: React.FC = () => {
   const { environmentId } = useParams();
   const navigate = useNavigate();
+
+  const queryClient = useQueryClient();
+  const { showBoundary } = useErrorBoundary();
+
+  const envKeyValueObj = useStore((state) => state.envKeyValue);
+  const envKeyValueModalOpen = useStore((state) => state.envKeyValueModalOpen);
 
   const handleOnClickButton: React.MouseEventHandler = (
     event: React.MouseEvent
@@ -58,6 +67,23 @@ const Environment: React.FC = () => {
   } else {
     throw new Error("Cannot find environment ID to get env key value pairs!");
   }
+
+  let updateEnvKeyValueMutation: UseMutationResult<any, Error, IUpdateEnvKeyValue, unknown>;
+  updateEnvKeyValueMutation = useMutation({
+    mutationFn: (envKeyValueData: IUpdateEnvKeyValue) => updateEnvKeyValue(envKeyValueObj.id, envKeyValueData),
+    onSuccess: (r) => {
+      console.log("Updated Env Key Value result: ", r);
+      queryClient.invalidateQueries({ queryKey: envKeyValuesQuery.key(environmentId) })
+    },
+    onError: (error) => {
+      console.error("Update Env Key Value Error: ", error);
+      showBoundary(error);
+    }
+  });
+  const updateEnvKeyValueHandler = async (envKeyValueData: IUpdateEnvKeyValue) => {
+    console.log("posting backend...");
+    updateEnvKeyValueMutation.mutate(envKeyValueData);
+  };
 
   if (
     envKeyValuesRetrieved.isLoading == true ||
@@ -90,6 +116,7 @@ const Environment: React.FC = () => {
       <Button className="w-full" onClick={handleOnClickButton}>
         Add New Env Key Value pair
       </Button>
+      {envKeyValueModalOpen && <EnvKeyValueModal onUpdateEnvKeyValue={updateEnvKeyValueHandler}/>}
     </section>
   );
 };
