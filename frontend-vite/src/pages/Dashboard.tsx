@@ -12,6 +12,16 @@ import { getAllProjects, updateProject } from "@/api/projects";
 import { ProjectModal } from "@/components/modals/ProjectModal";
 import { useErrorBoundary } from "react-error-boundary";
 
+const emptyAuthData: IAuthData = {
+  id: "",
+  name: "",
+  email: "",
+  role: "",
+  exp: "",
+  iss: "",
+  iat: ""
+}
+
 const retrieveUsers = (
   role: string,
   id: string
@@ -47,11 +57,19 @@ const retrieveProjects = (): UseQueryResult<any, Error> => {
 const Dashboard: React.FC = () => {
   const { showBoundary } = useErrorBoundary();
   const queryClient = useQueryClient();
+  
+  const userId = useStore((state) => state.userId);
+  console.log("userId", userId);
+  let userObj: UseQueryResult<any, Error>;
+  userObj = retrieveUsers("user", userId);
+  console.log("UserObj: ", userObj);
 
-  const userObj = useStore((state) => state.user);
+  const userObjData: IAuthData  =
+    userObj.data === undefined ? emptyAuthData : userObj.data.authData;
+  console.log("UserObjData: ", userObjData);
+  const { role } = userObjData as IAuthData;
+  const userRole = role;
 
-  const userRole = userObj.role as string;
-  const userId = userObj.id as string;
   const projObj: IProject = useStore((state) => state.project);
   const projectModalOpen: boolean = useStore((state) => state.projectModalOpen);
 
@@ -124,7 +142,7 @@ const Dashboard: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-      {projectModalOpen && <ProjectModal onUpdateProject={updateProjectHandler} />}
+      {projectModalOpen && <ProjectModal onUpdateProject={updateProjectHandler} userRole={userRole} />}
     </section>
   );
 };

@@ -4,20 +4,29 @@ import React from "react";
 
 interface UpdateProjectProps {
   onUpdateProject: (projectPayload: IUpdateProject) => void;
+  userRole: string;
 }
 
-export const ProjectModal: React.FC<UpdateProjectProps> = ({ onUpdateProject }) => {
+export const ProjectModal: React.FC<UpdateProjectProps> = ({
+  onUpdateProject,
+  userRole
+}) => {
   const projObj: IProject = useStore((state) => state.project);
   const modalError: string = useStore((state) => state.projectModalError);
-  const setModalError: (value: string) => void = useStore((state) => state.setProjectModalError);
-  const clearModalError: () => void = useStore((state) => state.clearProjectModalError);
+  const setModalError: (value: string) => void = useStore(
+    (state) => state.setProjectModalError
+  );
+  const clearModalError: () => void = useStore(
+    (state) => state.clearProjectModalError
+  );
   const setModal = useStore((state) => state.setProjectModalOpen);
   const nameInputRef: React.RefObject<HTMLInputElement> = React.createRef();
   const urlInputRef: React.RefObject<HTMLInputElement> = React.createRef();
+  const scopeInputRef: React.RefObject<HTMLSelectElement> = React.createRef();
 
   // const isFormDirty = () => {
-    // console.log("nameInput: ", nameInputRef.current?.value);
-    // console.log("projObj name: ", projObj.name);
+  // console.log("nameInput: ", nameInputRef.current?.value);
+  // console.log("projObj name: ", projObj.name);
   //   return (nameInputRef.current?.value === projObj.name) && (urlInputRef.current?.value === projObj.url);
   // }
 
@@ -25,33 +34,42 @@ export const ProjectModal: React.FC<UpdateProjectProps> = ({ onUpdateProject }) 
     event.preventDefault();
     const enteredName = nameInputRef.current?.value;
     const enteredUrl = urlInputRef.current?.value;
+    const enteredScope =
+      userRole === "admin" ? scopeInputRef.current?.value : "user";
 
-    if (enteredName || enteredUrl) {
-      if (enteredName !== projObj.name || enteredUrl !== projObj.url) {
+    if (enteredName || enteredUrl || enteredScope) {
+      if (enteredName !== projObj.name || enteredUrl !== projObj.url || enteredScope !== projObj.scope) {
         const projPayload = {
           name: enteredName,
-          url: enteredUrl
-        }
+          url: enteredUrl,
+          scope: enteredScope
+        };
         console.log("update proj payload: ", projPayload);
         onUpdateProject(projPayload);
       }
       setModal(false);
     } else {
-      setModalError("Required: Please key in either Name or Url to update.")
+      if (userRole === "admin") {
+        setModalError("Required: Please key in either Name or Url or change the Scope to update.");
+      } else {
+        setModalError("Required: Please key in either Name or Url to update.");
+      }
       // alert("At least 1 field is required!");
-    }    
-  }
+    }
+  };
 
   return (
-    <div className="modal-overlay" 
-         id="modalContainer" 
-         onClick={(e) => {
-          const target = e.target as HTMLInputElement
-          if(target.className === "modal-overlay") {
-            setModal(false);
-            clearModalError();
-          }
-      }}>
+    <div
+      className="modal-overlay"
+      id="modalContainer"
+      onClick={(e) => {
+        const target = e.target as HTMLInputElement;
+        if (target.className === "modal-overlay") {
+          setModal(false);
+          clearModalError();
+        }
+      }}
+    >
       <div className="modal" id="modal">
         <form onSubmit={handleOnSubmit}>
           <div className="modal-group">
@@ -82,7 +100,25 @@ export const ProjectModal: React.FC<UpdateProjectProps> = ({ onUpdateProject }) 
               ref={urlInputRef}
             />
           </div>
-          <div id="error-message" className="text-red-600">{modalError}</div>
+          {userRole === "admin" && <div className="modal-group">
+            <label className="font-medium text-lg mb-1" htmlFor="url">
+              Scope
+            </label>
+            <select
+              className="w-full border-2 bg-gray-100 rounded-xl p-4 mt-1 focus:bg-transparent"
+              id="scope"
+              ref={scopeInputRef}
+              onChange={clearModalError}
+              required
+              defaultValue={projObj.scope}
+            >
+              <option value="admin">Admin</option>
+              <option value="user">User</option>
+            </select>
+          </div>}
+          <div id="error-message" className="text-red-600">
+            {modalError}
+          </div>
           <Button className="block m-auto mt-6">Submit</Button>
         </form>
       </div>

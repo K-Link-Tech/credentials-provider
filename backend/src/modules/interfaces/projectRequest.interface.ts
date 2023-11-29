@@ -1,8 +1,11 @@
 import { JwtPayload } from "jsonwebtoken";
 
-interface PayloadWithNameUrlData {
+type scopes = "admin" | "user";
+
+interface PayloadWithNameUrlScopeData {
   name: string;
   url: string;
+  scope: scopes;
   data: JwtPayload;
 }
 
@@ -24,10 +27,11 @@ interface PayloadWithIdDataBody {
 interface UpdateReqBody {
   name: string;
   url: string;
+  scope: scopes;
 }
 
 export {
-  PayloadWithNameUrlData,
+  PayloadWithNameUrlScopeData,
   PayloadWithData,
   PayloadWithIdData,
   PayloadWithIdDataBody,

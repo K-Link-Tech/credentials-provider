@@ -8,11 +8,36 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  UseQueryResult,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useErrorBoundary } from "react-error-boundary";
 import { deleteProject } from "@/api/projects";
-import { QUERY_KEY } from "@/utils/keys.constants";
+import { QUERY_KEY, usersQuery } from "@/utils/keys.constants";
 import useStore from "@/store/useStore";
+import { getUser } from "@/api/users";
+
+const emptyAuthData: IAuthData = {
+  id: "",
+  name: "",
+  email: "",
+  role: "",
+  exp: "",
+  iss: "",
+  iat: "",
+};
+
+const retrieveUser = (id: string): UseQueryResult<any, Error> => {
+  let userQueryObj: UseQueryResult<any, Error>;
+  userQueryObj = useQuery({
+    queryKey: usersQuery.key(id),
+    queryFn: () => getUser(id),
+  });
+  return userQueryObj;
+};
 
 interface RowActionsProps {
   project: IProject;
@@ -24,6 +49,7 @@ export const ProjectsRowActions: React.FC<RowActionsProps> = (props) => {
   const { showBoundary } = useErrorBoundary();
   const setModal = useStore((state) => state.setProjectModalOpen);
   const setProj = useStore((state) => state.setProject);
+  const userId = useStore((state) => state.userId);
 
   const deleteProjectMutation = useMutation({
     mutationFn: deleteProject,
@@ -37,10 +63,23 @@ export const ProjectsRowActions: React.FC<RowActionsProps> = (props) => {
     },
   });
 
+  let userObj: UseQueryResult<any, Error>;
+  userObj = retrieveUser(userId);
+  const userObjData: IAuthData =
+    userObj.data === undefined ? emptyAuthData : userObj.data.authData;
+  const { role } = userObjData as IAuthData;
+
+  const hasRights = (role: string, scope: string): boolean => {
+    if (role === "admin") {
+      return true;
+    }
+    return role === scope;
+  };
+
   const handleOnClickUpdate = () => {
     setModal(true);
     setProj(props.project);
-  }
+  };
 
   return (
     <DropdownMenu>
@@ -58,16 +97,14 @@ export const ProjectsRowActions: React.FC<RowActionsProps> = (props) => {
           Copy Project ID
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
+        {hasRights(role, props.project.scope) && <DropdownMenuItem
           onClick={() => deleteProjectMutation.mutate(props.rowId)}
         >
           Delete Project
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={handleOnClickUpdate}
-        >
+        </DropdownMenuItem>}
+        {hasRights(role, props.project.scope) && <DropdownMenuItem onClick={handleOnClickUpdate}>
           Edit Project
-        </DropdownMenuItem>
+        </DropdownMenuItem>}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -30,8 +30,8 @@ const useStore = create<ICombinedStorage>()(
     getStorage: () => localStorage,
     partialize: (state) => ({
       loginStatus: state.loginStatus,
-      user: state.user
-    }) 
+      userId: state.userId
+    }), 
   }));
 
 export default useStore;

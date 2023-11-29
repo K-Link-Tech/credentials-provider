@@ -1,11 +1,13 @@
 interface INewProject {
   name: string;
   url: string;
+  scope: string;
 }
 
 interface IUpdateProject {
   name?: string;
   url?: string;
+  scope?: string;
 }
 
 interface IProject extends INewProject{

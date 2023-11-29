@@ -87,6 +87,12 @@ const projectColumns = [
       return row.getValue();
     },
   }),
+  projectColumnHelper.accessor("scope", {
+    header: () => "Scope",
+    cell: (row) => {
+      return row.getValue();
+    },
+  }),
   projectColumnHelper.accessor("createdAt", {
     header: () => "Created At",
     cell: (row) => {

@@ -30,7 +30,7 @@ const Login: React.FC = () => {
   const { showBoundary } = useErrorBoundary();
   const navigate = useNavigate();
   const setLogin = useStore((state) => state.setLogin);
-  const setUser = useStore((state) => state.setUser);
+  const setUserId = useStore((state) => state.setUserId);
   
   const mutation = useMutation({
     mutationFn: logUserIn,
@@ -40,7 +40,7 @@ const Login: React.FC = () => {
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
       localStorage.setItem("user", JSON.stringify(data.user));
-      setUser(data.user);
+      setUserId(data.user.id);
       setLogin();
 
       navigate("/home", { replace: true });

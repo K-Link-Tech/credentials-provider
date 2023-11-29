@@ -6,7 +6,7 @@ import {
 } from '../../utils/routerEnclose';
 import authenticateToken from '../../middleware/authorization';
 import {
-  PayloadWithNameUrlData,
+  PayloadWithNameUrlScopeData,
   PayloadWithData,
   UpdateReqBody
 } from '../interfaces/projectRequest.interface';
@@ -28,7 +28,7 @@ router.post(
     }
   }),
   routerEnclose(handler.createNewProject, (req: Request) => {
-    const body: PayloadWithNameUrlData = req.body;
+    const body: PayloadWithNameUrlScopeData = req.body;
     return {
       source: "express",
       payload: body

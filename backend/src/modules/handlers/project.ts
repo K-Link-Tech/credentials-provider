@@ -6,7 +6,7 @@ import {
   DatabaseRequestError,
 } from '../../utils/errorTypes';
 import {
-  PayloadWithNameUrlData,
+  PayloadWithNameUrlScopeData,
   PayloadWithIdData,
   PayloadWithData,
   PayloadWithIdDataBody,
@@ -28,12 +28,12 @@ type eventHandler = (event: event) => Object;
 
 const createNewProject: eventHandler = async (event) => {
   // data contains the jwtPayload from authentication with user information.
-  const { name, url, data } = event.payload as PayloadWithNameUrlData;
+  const { name, url, scope, data } = event.payload as PayloadWithNameUrlScopeData;
 
   try {
-    if (!name || !url) {
+    if (!name || !url || !scope) {
       const e = new BadUserRequestError(
-        'Missing name, url parameter(s).',
+        'Missing name, url, scope parameter(s).',
         '401'
       );
       throw e;
@@ -44,7 +44,8 @@ const createNewProject: eventHandler = async (event) => {
       .insert(projects)
       .values({
         name: name,
-        url: url
+        url: url,
+        scope: scope
       })
       .returning()
       .catch((error) => {
@@ -441,7 +442,7 @@ const deleteAllProjects: eventHandler = async (event) => {
 
 const updateProject: eventHandler = async (event) => {
   const { id, data, body } = event.payload as PayloadWithIdDataBody;
-  const { name, url } = body as UpdateReqBody;
+  const { name, url, scope } = body as UpdateReqBody;
   try {
     if (!id) {
       const e = new DatabaseRequestError(
@@ -451,11 +452,11 @@ const updateProject: eventHandler = async (event) => {
       throw e;
     }
 
-    if (name === undefined && url === undefined) {
+    if (name === undefined && url === undefined && scope === undefined) {
       logging.error(
         NAMESPACE,
         'Missing parameters to update project data! Parameters retrieved: \n',
-        { name: name, url: url }
+        { name: name, url: url, scope: scope }
       );
       const e = new BadUserRequestError(
         'Update request body cannot be empty!',
@@ -544,6 +545,21 @@ const updateProject: eventHandler = async (event) => {
       await db
         .update(projects)
         .set({ url: url })
+        .where(eq(projects.id, id))
+        .catch((error) => {
+          logging.error(NAMESPACE, getErrorMessage(error), error);
+          const e = new DatabaseRequestError(
+            'Update projects database query error!',
+            '501'
+          );
+          throw e;
+        });
+      hasUpdated = true;
+    }
+    if (scope) {
+      await db
+        .update(projects)
+        .set({ scope: scope })
         .where(eq(projects.id, id))
         .catch((error) => {
           logging.error(NAMESPACE, getErrorMessage(error), error);
