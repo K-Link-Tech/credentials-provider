@@ -1,11 +1,22 @@
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "../../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../../ui/dropdown-menu";
-import { environmentsQuery } from "@/utils/keys.constants";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { envKeyValuesQuery, environmentsQuery } from "@/utils/keys.constants";
+import { UseQueryResult, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useErrorBoundary } from "react-error-boundary";
 import { deleteEnvironment } from "@/api/environments";
 import useStore from "@/store/useStore";
+import DownloadButton from "@/components/download/DownloadButton";
+import { getEnvKeyValue } from "@/api/envkeyvalues";
+
+const retrieveEnvKeyValues = (id: string): UseQueryResult<any, Error> => {
+  let envKeyValueQueryObj: UseQueryResult<any, Error>;
+  envKeyValueQueryObj = useQuery({
+    queryKey: envKeyValuesQuery.key(id),
+    queryFn: () => getEnvKeyValue(id),
+  });
+  return envKeyValueQueryObj;
+};
 
 interface RowActionsProps {
   projectId: string,
@@ -30,6 +41,14 @@ export const EnvironmentsRowActions: React.FC<RowActionsProps> = (props) => {
       showBoundary(error);
     },
   });
+
+  let envKeyValuesRetrieved: UseQueryResult<any, Error>;
+  let envKeyValuesData: IEnvKeyValue[] = [];
+  envKeyValuesRetrieved = retrieveEnvKeyValues(props.rowId);
+  if (envKeyValuesRetrieved.data !== undefined) {
+    const queriedEnvKeyValuesData = envKeyValuesRetrieved.data;
+    envKeyValuesData = queriedEnvKeyValuesData.envKeyValueData;
+  }
 
   const handleOnClickUpdate = () => {
     setModal(true);
@@ -62,6 +81,7 @@ export const EnvironmentsRowActions: React.FC<RowActionsProps> = (props) => {
         >
           Edit Environment
         </DropdownMenuItem>
+        <DownloadButton fileName={props.environment.name} jsonData={envKeyValuesData}/>
       </DropdownMenuContent>
     </DropdownMenu>
   );
