@@ -1,31 +1,29 @@
-import React from "react";
-import { DropdownMenuItem } from "../ui/dropdown-menu";
+import { DropdownMenuItem } from "../../ui/dropdown-menu";
 
-interface DownloadButtonProps {
-  jsonData: IEnvKeyValue[];
+interface DownloadButtonProps<T extends object, K extends keyof T, J extends keyof T> {
+  data: T[];
   fileName: string;
+  property1: K;
+  property2: J;
 }
 
-export const DownloadButton: React.FC<DownloadButtonProps> = ({
-  jsonData,
+export function DownloadButton<T extends object, K extends keyof T, J extends keyof T> ({
+  data,
   fileName,
-}) => {
+  property1,
+  property2,
+}: DownloadButtonProps<T,K, J>) {
 
+  const extractedJsonData = data.map(o => {
+    const p1 = o[property1] as string;
+    const p2 = o[property2] as string;
+    return ({
+      [property1]: p1.toUpperCase().replace(" ", "_"),
+      [property2]: p2,
+    });
+  })
+  // const extractedJsonData2 = data.map(o => `${o.key.toUpperCase().replace(" ", "_")}=${o.value} \n`);
   
-  const extractedJsonData = jsonData.map(o => ({
-    key: o.key,
-    value: o.value
-  }));
-  
-  // const columnsToExtract: string[] = ["key", "value"];
-
-  // const extractedJsonData = jsonData.map(o => {
-  //   const obj: any = {};
-  //   columnsToExtract.forEach(element => {
-  //     obj[element] = o[element as keyof IEnvKeyValue]
-  //   });
-  //   return obj;
-  // });
 
   const downloadJsonFile = () => {
     // Convert JSON to string
@@ -39,7 +37,7 @@ export const DownloadButton: React.FC<DownloadButtonProps> = ({
     link.href = URL.createObjectURL(blob);
 
     // Set the file name
-    link.download = `${fileName}_environment.json`;
+    link.download = `${fileName.replace(" ","_")}_environment.json`;
 
     // Append the link to the document
     document.body.appendChild(link);
@@ -53,7 +51,7 @@ export const DownloadButton: React.FC<DownloadButtonProps> = ({
 
   return (
     <DropdownMenuItem onClick={downloadJsonFile}>
-      Download Environment JSON
+      Download Env Key Values JSON file
     </DropdownMenuItem>
   );
 };

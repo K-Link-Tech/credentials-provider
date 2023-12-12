@@ -6,8 +6,9 @@ import { UseQueryResult, useMutation, useQuery, useQueryClient } from "@tanstack
 import { useErrorBoundary } from "react-error-boundary";
 import { deleteEnvironment } from "@/api/environments";
 import useStore from "@/store/useStore";
-import DownloadButton from "@/components/download/DownloadButton";
+import DownloadEnvButton from "@/components/download/env_key_values/DownloadEnvButton";
 import { getEnvKeyValue } from "@/api/envkeyvalues";
+import DownloadJSONButton from "@/components/download/env_key_values/DownloadJSONButton";
 
 const retrieveEnvKeyValues = (id: string): UseQueryResult<any, Error> => {
   let envKeyValueQueryObj: UseQueryResult<any, Error>;
@@ -81,7 +82,8 @@ export const EnvironmentsRowActions: React.FC<RowActionsProps> = (props) => {
         >
           Edit Environment
         </DropdownMenuItem>
-        <DownloadButton fileName={props.environment.name} jsonData={envKeyValuesData}/>
+        <DownloadJSONButton<IEnvKeyValue, "key", "value"> fileName={props.environment.name} data={envKeyValuesData} property1="key" property2="value"/>
+        <DownloadEnvButton<IEnvKeyValue, "key", "value"> fileName={props.environment.name} data={envKeyValuesData} property1="key" property2="value"/>
       </DropdownMenuContent>
     </DropdownMenu>
   );

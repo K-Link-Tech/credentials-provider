@@ -120,18 +120,15 @@ const Dashboard: React.FC = () => {
         <h2 className="text-3xl font-medium text-center">Data</h2>
       </div>
       <div  className="pt-4">
-        <Tabs defaultValue="users">
+        <Tabs defaultValue="projects">
           <TabsList className="w-full justify-evenly rounded-2xl">
-            <TabsTrigger value="users" className="w-full rounded-2xl">
-              Users
-            </TabsTrigger>
             <TabsTrigger value="projects" className="w-full rounded-2xl">
               Projects
             </TabsTrigger>
+            <TabsTrigger value="users" className="w-full rounded-2xl">
+              Users
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="users">
-            <UsersTable data={userData} columns={userColumns} />
-          </TabsContent>
           <TabsContent
             value="projects"
             className="flex-col flex mx-auto space-y-4">
@@ -139,6 +136,9 @@ const Dashboard: React.FC = () => {
             <Button onClick={() => navigate("/home/proj/create")}>
               Add New Project
             </Button>
+          </TabsContent>
+          <TabsContent value="users">
+            <UsersTable data={userData} columns={userColumns} />
           </TabsContent>
         </Tabs>
       </div>

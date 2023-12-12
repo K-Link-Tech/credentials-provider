@@ -27,7 +27,7 @@ export const UsersRowActions: React.FC<RowActionsProps> = (props) => {
         <DropdownMenuItem
           onClick={() => navigator.clipboard.writeText(props.rowId)}
         >
-          Copy project ID
+          Copy user ID
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

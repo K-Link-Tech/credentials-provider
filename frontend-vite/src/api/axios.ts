@@ -31,6 +31,9 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const refreshToken = localStorage.getItem("refreshToken");
+        if (!refreshToken) {
+          return;
+        }
         const response = await api.get(REFRESH_ACCESS_URL);
         const { accessSigningPayload } = response.data;
 

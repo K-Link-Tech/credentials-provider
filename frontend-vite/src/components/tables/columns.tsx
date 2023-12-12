@@ -75,7 +75,7 @@ const projectColumns = [
     cell: (row) => (
       <Link
         to={{ pathname: "/home/proj/" + `${row.row.original.id}` }}
-        className="p-1 ring-1 ring-black hover:underline hover:bg-sky-200 active:bg-sky-400"
+        className="hover:underline"
       >
         {row.getValue()}
       </Link>
@@ -127,7 +127,7 @@ const environmentColumns = [
     cell: (row) => (
       <Link
         to={{ pathname: "/home/env/" + `${row.row.original.id}` }}
-        className="p-1 ring-1 ring-black hover:underline hover:bg-sky-200 active:bg-sky-400"
+        className="hover:underline"
       >
         {row.getValue()}
       </Link>
