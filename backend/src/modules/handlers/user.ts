@@ -1,16 +1,19 @@
-import db from '../../config/db';
-import bcrypt from 'bcrypt';
-import { eq, sql } from 'drizzle-orm';
-import { getErrorMessage, getErrorName } from '../../utils/errorHandler';
-import { users } from '../../schema/users.schema';
-import logging from '../../config/logging.config';
-import { ReqParams, UpdateParams } from '../interfaces/usersRequest.interface';
+import { getErrorMessage, getErrorName } from "../../utils/errorHandler";
+import logging from "../../config/logging.config";
+import { ReqParams, UpdateParams } from "../interfaces/usersRequest.interface";
 import {
   BadUserRequestError,
   DatabaseRequestError,
-} from '../../utils/errorTypes';
+} from "../../utils/errorTypes";
+import {
+  deletedAllUsers,
+  deletedOneUser,
+  getAllUsers,
+  getOneUser,
+  isUserUpdated,
+} from "../lib/db_query/user";
 
-const NAMESPACE = 'User-routes';
+const NAMESPACE = "User-routes";
 
 type event = {
   source: string;
@@ -25,43 +28,9 @@ const getUsers: eventHandler = async (event) => {
   const { id, authData } = event.payload as ReqParams;
   // if id == null means the person is trying to get all users
   try {
-
     const usersRequested =
-      id == null
-        ? await db
-            .select()
-            .from(users)
-            .catch((error) => {
-              logging.error(NAMESPACE, getErrorMessage(error), error);
-              const e = new DatabaseRequestError(
-                'Database query error.',
-                '501'
-              );
-              throw e;
-            })
-        : await db
-            .select()
-            .from(users)
-            .where(sql`${users.id} = ${id}`)
-            .catch((error) => {
-              logging.error(NAMESPACE, getErrorMessage(error), error);
-              const e = new DatabaseRequestError(
-                'Database query error.',
-                '501'
-              );
-              throw e;
-            });
-    // error handling in case no such user found.
-    if (usersRequested.length.valueOf() === 0) {
-      logging.error(
-        NAMESPACE,
-        'Database query failed to retrieve user(s)! User array retrieved: ',
-        usersRequested
-      );
-      const e = new DatabaseRequestError('User(s) do not exist.', '404');
-      throw e;
-    }
-    logging.info(NAMESPACE, '---------END OF GET USERS PROCESS---------');
+      id == null ? await getAllUsers() : await getOneUser(id);
+    logging.info(NAMESPACE, "---------END OF GET USERS PROCESS---------");
     return {
       statusCode: 200,
       data: {
@@ -76,7 +45,7 @@ const getUsers: eventHandler = async (event) => {
     const errorCode = code === null ? 500 : code;
     return {
       statusCode: errorCode,
-      error: new Error('Get request failed.'),
+      error: new Error("Get request failed."),
     };
   }
 };
@@ -87,35 +56,22 @@ const deleteUser: eventHandler = async (event) => {
 
   try {
     if (!id) {
-      const e = new DatabaseRequestError('Missing id parameter', '401');
+      const e = new DatabaseRequestError("Missing id parameter", "401");
       throw e;
     }
+    logging.info(NAMESPACE, "Deleting user from database.");
+    const deletedUser = await deletedOneUser(id);
 
-    logging.info(NAMESPACE, 'Deleting user from database.');
-    const deletedUser = await db
-      .delete(users)
-      .where(eq(users.id, id))
-      .returning()
-      .catch((error) => {
-        logging.error(NAMESPACE, getErrorMessage(error), error);
-        const e = new DatabaseRequestError('Database query error.', '501');
-        throw e;
-      });
-
-    if (deletedUser.length.valueOf() === 0) {
-      logging.error(
-        NAMESPACE,
-        'Database query failed to retrieve user! User array retrieved: ',
-        deletedUser
-      );
-      const e = new DatabaseRequestError('User does not exist.', '404');
-      throw e;
-    }
-    logging.info(NAMESPACE, '---------END OF DELETE USER PROCESS---------');
+    logging.info(
+      NAMESPACE,
+      "The following user has been deleted... \n",
+      deleteUser
+    );
+    logging.info(NAMESPACE, "---------END OF DELETE USER PROCESS---------");
     return {
       statusCode: 200,
       data: {
-        message: 'The following user has been deleted from database:',
+        message: "The following user has been deleted from database:",
         userData: deletedUser,
         authData: authData,
       },
@@ -126,7 +82,7 @@ const deleteUser: eventHandler = async (event) => {
     const errorCode = code === null ? 500 : code;
     return {
       statusCode: errorCode,
-      error: new Error('Delete request failed!'),
+      error: new Error("Delete request failed!"),
     };
   }
 };
@@ -135,34 +91,23 @@ const deleteUser: eventHandler = async (event) => {
 const deleteAllUsers: eventHandler = async (event) => {
   const { authData } = event.payload as ReqParams;
   try {
-    logging.info(NAMESPACE, 'Deleting ALL users from database.');
-    const usersDeleted = await db
-      .delete(users)
-      .returning()
-      .catch((error) => {
-        logging.error(NAMESPACE, getErrorMessage(error), error);
-        const e = new DatabaseRequestError('Database query error.', '501');
-        throw e;
-      });
-    if (usersDeleted.length.valueOf() === 0) {
-      logging.error(NAMESPACE, 'Database query failed to retrieve user! User ');
-      const e = new DatabaseRequestError('User does not exist.', '404');
-      throw e;
-    }
+    logging.info(NAMESPACE, "Deleting ALL users from database.");
+    const usersDeleted = await deletedAllUsers();
 
     logging.info(
       NAMESPACE,
-      'The following users has been deleted... \nDisplaying now... \n'
+      "The following users has been deleted... \n",
+      usersDeleted
     );
     logging.info(
       NAMESPACE,
-      '---------END OF DELETE ALL USERS PROCESS---------'
+      "---------END OF DELETE ALL USERS PROCESS---------"
     );
 
     return {
       statusCode: 200,
       data: {
-        message: 'The following users has been deleted from database:',
+        message: "The following users has been deleted from database:",
         users: usersDeleted,
         authData: authData,
       },
@@ -173,7 +118,7 @@ const deleteAllUsers: eventHandler = async (event) => {
     const errorCode = code === null ? 500 : code;
     return {
       statusCode: errorCode,
-      error: new Error('Delete all request failed!'),
+      error: new Error("Delete all request failed!"),
     };
   }
 };
@@ -183,138 +128,46 @@ const updateUser: eventHandler = async (event) => {
   const { name, email, password, authData } = body as UpdateParams;
 
   try {
-    if (!id ) {
-      const e = new DatabaseRequestError(
-        'Missing id parameter(s)',
-        '401'
-      );
+    if (!id) {
+      const e = new DatabaseRequestError("Missing id parameter", "401");
       throw e;
     }
 
-    if (
-      name === undefined &&
-      email === undefined &&
-      password === undefined
-    ) {
+    if (name === undefined && email === undefined && password === undefined) {
       logging.error(
         NAMESPACE,
-        'Missing all parameters tp update user data! Parameters retrieved: \n',
+        "Missing all parameters to update user data! Parameters retrieved: \n",
         { name: name, email: email, password: password }
       );
       const e = new BadUserRequestError(
-        'Update request body cannot be empty!',
-        '400'
+        "Update request body cannot be empty!",
+        "400"
       );
       throw e;
     }
 
-    logging.info(NAMESPACE, 'Updating user in database.');
-    const originalUser = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, id))
-      .catch((error) => {
-        logging.error(NAMESPACE, getErrorMessage(error), error);
-        const e = new DatabaseRequestError('Get request query error!', '501');
-        throw e;
-      });
-
-    if (originalUser.length.valueOf() === 0) {
-      logging.error(NAMESPACE, 'Database query failed to retrieve user!');
-      const e = new DatabaseRequestError('Uuid given cannot be found!', '404');
-      throw e;
-    }
-
-    let hasUpdated: boolean = false;
-    if (name) {
-      await db
-        .update(users)
-        .set({ name: name })
-        .where(eq(users.id, id))
-        .catch((error) => {
-          logging.error(NAMESPACE, getErrorMessage(error), error);
-          const e = new DatabaseRequestError(
-            'Update database query error!',
-            '501'
-          );
-          throw e;
-        });
-      hasUpdated = true;
-    }
-    if (email) {
-      await db
-        .update(users)
-        .set({ email: email })
-        .where(eq(users.id, id))
-        .catch((error) => {
-          logging.error(NAMESPACE, getErrorMessage(error), error);
-          const e = new DatabaseRequestError(
-            'Update database query error!',
-            '501'
-          );
-          throw e;
-        });
-      hasUpdated = true;
-    }
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      await db
-        .update(users)
-        .set({ password: hashedPassword })
-        .where(eq(users.id, id))
-        .catch((error) => {
-          logging.error(NAMESPACE, getErrorMessage(error), error);
-          const e = new DatabaseRequestError(
-            'Update database query error!',
-            '501'
-          );
-          throw e;
-        });
-      hasUpdated = true;
-    }
-
+    logging.info(NAMESPACE, "Updating user in database.");
+    const originalUser = await getOneUser(id);
+    let hasUpdated = isUserUpdated(id, name, email, password);
     if (!hasUpdated) {
       logging.error(
-        NAMESPACE, 
-        'No parameters were updated, update request failed. Printing hasUpdated: ',
+        NAMESPACE,
+        "No parameters were updated, update request failed. Printing hasUpdated: ",
         hasUpdated
       );
       const e = new DatabaseRequestError(
-        'Update request failed after running database update query.',
-        '500'
+        "Update request failed after running database update query.",
+        "500"
       );
       throw e;
     }
 
-    const updatedUser = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, id))
-      .catch((error) => {
-        logging.error(NAMESPACE, getErrorMessage(error), error);
-        const e = new DatabaseRequestError('Get database query error!');
-        e.name = '501';
-        throw e;
-      });
-
-    if (updatedUser.length.valueOf() === 0) {
-      logging.error(
-        NAMESPACE,
-        'Update process failed. Current user data in database: \n',
-        updateUser
-      );
-      const e = new DatabaseRequestError(
-        'Update process failed please check request body parameters.',
-        '501'
-      );
-      throw e;
-    }
-
-    logging.info(NAMESPACE, '---------END OF UPDATE USER PROCESS---------');
+    const updatedUser = await getOneUser(id);
+    logging.info(NAMESPACE, "---------END OF UPDATE USER PROCESS---------");
     return {
       statusCode: 202,
       data: {
-        message: 'The following user has been updated in database:',
+        message: "The following user has been updated in database:",
         originalUser: originalUser,
         updatedUser: updatedUser,
         authData: authData,
@@ -326,7 +179,7 @@ const updateUser: eventHandler = async (event) => {
     const errorCode = code === null ? 500 : code;
     return {
       statusCode: errorCode,
-      error: new Error('Update request failed.'),
+      error: new Error("Update request failed."),
     };
   }
 };
