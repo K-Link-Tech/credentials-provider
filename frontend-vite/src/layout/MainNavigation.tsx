@@ -17,8 +17,8 @@ const MainNavigation: React.FC = () => {
   }
 
   return (
-    <header className="w-full h-20 flex items-center justify-between bg-white p-5">
-      <div className="font-bold text-2xl text-cyan-900">
+    <header className="w-full h-20 flex items-center justify-between bg-k-link-blue p-5">
+      <div className="font-bold text-2xl text-white">
         Credential Provider
       </div>
       <nav>
@@ -32,9 +32,6 @@ const MainNavigation: React.FC = () => {
               {buttonText}
             </Link>
           </li>
-          {/* <Button asChild>
-            <Link to="/login">Login</Link>
-          </Button> */}
         </ul>
       </nav>
     </header>

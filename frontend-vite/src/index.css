@@ -16,7 +16,7 @@ html {
 
 body {
   min-height: 100vh;
-  background-color: rgba(21,29,114,255);
+  background-color: white;
 }
 
 @layer components {

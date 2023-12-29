@@ -1,9 +1,9 @@
-import { getErrorMessage } from '../utils/errorHandler';
+import { getErrorMessage, getErrorName } from '../utils/errorHandler';
 import dotenv from 'dotenv';
 import { resolve } from 'path';
 import { verifyJWT } from '../utils/JWT-helpers';
 import logging from '../config/logging.config';
-import { extractJWTReq } from '../modules/interfaces/authRequest.interface';
+import { DecodedJWTObj, extractJWTReq } from '../modules/interfaces/authRequest.interface';
 
 dotenv.config({ path: resolve(__dirname, '../../../../.env') });
 
@@ -33,17 +33,21 @@ const authenticateToken: eventHandler = async (event) => {
   }
 
   try {
-    const accessDecoded = verifyJWT(accessToken, 'accessPublicKey');
+    const accessDecoded = await verifyJWT(accessToken, 'accessPublicKey');
     return {
       statusCode: 200,
       data: accessDecoded,
     };
   } catch (error) {
     logging.error(NAMESPACE, getErrorMessage(error), error);
+    const code = parseInt(getErrorName(error));
+    const errorCode = !code ? 401 : code;
+    logging.error(NAMESPACE, "error code: ", errorCode);
+    const errorMsg = getErrorMessage(error) ? getErrorMessage(error) : "Token validation error!";
     return {
-      statusCode: 401,
-      error: new Error('Token validation error!'),
-    };
+      statusCode: errorCode,
+      error: new Error(errorMsg),
+    }
   }
 };
 

@@ -1,6 +1,6 @@
 import logging from '../config/logging.config';
 import { verifyJWT } from '../utils/JWT-helpers';
-import { extractJWTReq } from '../modules/interfaces/authRequest.interface';
+import { DecodedJWTObj, extractJWTReq } from '../modules/interfaces/authRequest.interface';
 import { getErrorMessage } from '../utils/errorHandler';
 
 const NAMESPACE = 'Auth/extractJWT';
@@ -24,9 +24,9 @@ const extractBothJWT: eventHandler = async (event) => {
 
   if (accessToken && refreshToken) {
     try {
-      const accessDecoded = verifyJWT(accessToken, 'accessPublicKey');
+      const accessDecoded = await verifyJWT(accessToken, 'accessPublicKey');
       logging.info(NAMESPACE, 'Access token validated.');
-      const refreshDecoded = verifyJWT(refreshToken, 'refreshPublicKey');
+      const refreshDecoded = await verifyJWT(refreshToken, 'refreshPublicKey');
       logging.info(NAMESPACE, 'Refresh token validated.');
 
       logging.info(

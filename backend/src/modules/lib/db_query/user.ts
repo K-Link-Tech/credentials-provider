@@ -106,7 +106,7 @@ export const isUserUpdated = async (
   if (name) {
     await db
       .update(users)
-      .set({ name: name })
+      .set({ name: name, updatedAt: new Date() })
       .where(eq(users.id, Uid))
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);
@@ -121,7 +121,7 @@ export const isUserUpdated = async (
   if (email) {
     await db
       .update(users)
-      .set({ email: email })
+      .set({ email: email, updatedAt: new Date() })
       .where(eq(users.id, Uid))
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);
@@ -137,7 +137,7 @@ export const isUserUpdated = async (
     const hashedPassword = await bcrypt.hash(password, 10);
     await db
       .update(users)
-      .set({ password: hashedPassword })
+      .set({ password: hashedPassword, updatedAt: new Date() })
       .where(eq(users.id, Uid))
       .catch((error) => {
         logging.error(NAMESPACE, getErrorMessage(error), error);

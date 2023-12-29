@@ -24,12 +24,6 @@ export const ProjectModal: React.FC<UpdateProjectProps> = ({
   const urlInputRef: React.RefObject<HTMLInputElement> = React.createRef();
   const scopeInputRef: React.RefObject<HTMLSelectElement> = React.createRef();
 
-  // const isFormDirty = () => {
-  // console.log("nameInput: ", nameInputRef.current?.value);
-  // console.log("projObj name: ", projObj.name);
-  //   return (nameInputRef.current?.value === projObj.name) && (urlInputRef.current?.value === projObj.url);
-  // }
-
   const handleOnSubmit: React.FormEventHandler = (event: React.FormEvent) => {
     event.preventDefault();
     const enteredName = nameInputRef.current?.value;

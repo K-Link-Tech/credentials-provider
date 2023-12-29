@@ -5,6 +5,7 @@ const createProjectSlice: StateCreator<IProjectData> = (set) => ({
   project: {
     id: "",
     name: "",
+    scope: "",
     url: "",
     createdAt: "",
     updatedAt: ""

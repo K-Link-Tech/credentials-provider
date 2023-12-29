@@ -1,13 +1,15 @@
-import { useState } from 'react';
-import Card from '../cards/LoginCard';
+import { useState } from "react";
+import Card from "../cards/LoginCard";
+import useStore from "@/store/useStore";
 
 interface SignInFormProps {
   onSignIn: Function;
 }
 
 const SignInForm: React.FC<SignInFormProps> = ({ onSignIn }) => {
-  const [email, setEmail] = useState('');
-  const [pwd, setPwd] = useState('');
+  const [email, setEmail] = useState("");
+  const [pwd, setPwd] = useState("");
+  const loginErrorStatus = useStore((state) => state.loginErrorStatus);
 
   const handleSignIn: React.FormEventHandler = (event: React.FormEvent) => {
     event.preventDefault();
@@ -15,36 +17,38 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSignIn }) => {
       email: email,
       password: pwd,
     };
-    console.log('user', userPayload);
+    console.log("user", userPayload);
     onSignIn(userPayload);
-    // setUser("");
-    // setPwd("");
   };
 
   return (
     <Card>
       <h1 className="text-5xl font-semibold">Login</h1>
-      <p className="text-base font-medium text-gray-500 mt-4">
+      {loginErrorStatus ? <p className="text-lg font-medium text-red-500 mt-4">
+        Your email or password is incorrect.
+      </p> : <p className="text-lg font-medium text-gray-400 mt-4">
         Enter your details to login.
-      </p>
-      <form className="mt-8" onSubmit={handleSignIn}>
+      </p>}
+      <form className="mt-4" onSubmit={handleSignIn}>
         <div>
           <label className="text-lg font-medium">Email:</label>
           <input
-            className="w-full border-2 bg-gray-100 rounded-xl p-4 mt-1 focus:bg-transparent"
+            className="w-full border-2 bg-white rounded-xl p-4 mt-1 text-black"
             placeholder="Enter your email"
             onChange={(e) => setEmail(e.target.value)}
             value={email}
+            required
           />
         </div>
         <div>
           <label className="text-lg font-medium">Password:</label>
           <input
-            className="w-full border-2 bg-gray-100 rounded-xl p-4 mt-1 focus:bg-transparent"
+            className="w-full border-2 bg-white rounded-xl p-4 mt-1 text-black"
             placeholder="Enter your password"
             type="password"
             onChange={(e) => setPwd(e.target.value)}
             value={pwd}
+            required
           />
         </div>
         <div className="mt-8">

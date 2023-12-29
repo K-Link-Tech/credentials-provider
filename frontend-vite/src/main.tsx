@@ -38,7 +38,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           onError={() => {
             console.log("Error found");
           }}
-        >
+          >
           <Routes>
             <Route path="/" element={<App />}>
               <Route path="/home" element={<Dashboard />} />

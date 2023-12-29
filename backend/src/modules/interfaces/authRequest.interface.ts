@@ -1,3 +1,5 @@
+import { JwtPayload } from "jsonwebtoken";
+
 type roles = "admin" | "user";
 interface LoginReq {
   email: string;
@@ -20,7 +22,7 @@ interface extractJWTReq {
   refreshToken: string | undefined,
 }
 
-interface DecodedJWTObj {
+interface DecodedJWTObj extends JwtPayload {
   id: string,
   name: string,
   email: string,
