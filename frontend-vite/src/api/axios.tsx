@@ -55,6 +55,7 @@ export const setupInterceptors = (navigate: NavigateFunction, logout: Function) 
           return api(originalRequest);
         } catch (refreshError) {
           // Handle refresh token error or redirect to login
+          navigate("/login", { replace: true });
           localStorage.clear();
           return Promise.reject(refreshError);
         }

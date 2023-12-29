@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Card from "../cards/LoginCard";
 import useStore from "@/store/useStore";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 
 interface SignInFormProps {
   onSignIn: Function;
@@ -9,6 +10,7 @@ interface SignInFormProps {
 const SignInForm: React.FC<SignInFormProps> = ({ onSignIn }) => {
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
+  const [visible, setVisible] = useState(false);
   const loginErrorStatus = useStore((state) => state.loginErrorStatus);
 
   const handleSignIn: React.FormEventHandler = (event: React.FormEvent) => {
@@ -24,11 +26,15 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSignIn }) => {
   return (
     <Card>
       <h1 className="text-5xl font-semibold">Login</h1>
-      {loginErrorStatus ? <p className="text-lg font-medium text-red-500 mt-4">
-        Your email or password is incorrect.
-      </p> : <p className="text-lg font-medium text-gray-400 mt-4">
-        Enter your details to login.
-      </p>}
+      {loginErrorStatus ? (
+        <p className="text-lg font-medium text-red-500 mt-4">
+          Your email or password is incorrect.
+        </p>
+      ) : (
+        <p className="text-lg font-medium text-gray-400 mt-4">
+          Enter your details to login.
+        </p>
+      )}
       <form className="mt-4" onSubmit={handleSignIn}>
         <div>
           <label className="text-lg font-medium">Email:</label>
@@ -42,14 +48,17 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSignIn }) => {
         </div>
         <div>
           <label className="text-lg font-medium">Password:</label>
-          <input
-            className="w-full border-2 bg-white rounded-xl p-4 mt-1 text-black"
-            placeholder="Enter your password"
-            type="password"
-            onChange={(e) => setPwd(e.target.value)}
-            value={pwd}
-            required
-          />
+          <div className="relative">
+            <input
+              className="w-full border-2 bg-white rounded-xl mt-1 p-4 text-black pr-10"
+              placeholder="Enter your password"
+              type={visible ? "text" : "password"}
+              onChange={(e) => setPwd(e.target.value)}
+              value={pwd}
+              required
+            />
+            <div className="absolute top-1/2 right-4 transform -translate-y-1/3 text-black cursor-pointer" onClick={() => setVisible(!visible)}>{visible ? <FaRegEye /> : <FaRegEyeSlash />}</div>
+          </div>
         </div>
         <div className="mt-8">
           <div>
